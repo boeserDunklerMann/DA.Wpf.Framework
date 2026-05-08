@@ -1,0 +1,52 @@
+﻿<UserControl x:Class="Wpf.Example.Controls.UserListCtrl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Wpf.Example.Controls"
+			 xmlns:vm="clr-namespace:Wpf.Example.Controls.MVVM"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+	<UserControl.DataContext>
+		<vm:UserListViewModel />
+	</UserControl.DataContext>
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="30"/>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="160"/>
+		</Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="*"/>
+		</Grid.ColumnDefinitions>
+		<Label Grid.Row="0">Benutzer</Label>
+		<DataGrid Width="auto" Background="LightBlue" Grid.Row="1" ItemsSource="{Binding Users, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"
+				  AutoGenerateColumns="False" SelectedItem="{Binding SelectedUser}" CanUserAddRows="False" CanUserDeleteRows="False" HeadersVisibility="All" >
+			<DataGrid.Columns>
+				<DataGridTextColumn Header="Nachname" Binding="{Binding LastName}"/>
+				<DataGridTextColumn Header="Vorname" Binding="{Binding FirstName}"/>
+				<DataGridTextColumn Header="Initialen" Binding="{Binding Name}"/>
+				<DataGridCheckBoxColumn Header="gelöscht" Binding="{Binding Deleted}"/>
+				<DataGridTemplateColumn Header="Löschen">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<Button Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:UserListCtrl}}, Path=DataContext.DeleteUser}">delete</Button>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+				<DataGridTextColumn Header="angelegt am" Binding="{Binding CreationDate}"/>
+				<DataGridTextColumn Header="letzte Änderung" Binding="{Binding ChangeDate}"/>
+			</DataGrid.Columns>
+		</DataGrid>
+		<!--Control, neuer User-->
+		<StackPanel Orientation="Vertical" Grid.Row="2">
+			<Label>Vorname</Label>
+			<TextBox Text="{Binding NewUser.FirstName}"/>
+			<Label>Nachname</Label>
+			<TextBox Text="{Binding NewUser.LastName}"/>
+			<Label>Initialen</Label>
+			<TextBox Text="{Binding NewUser.Name}"/>
+			<Button Command="{Binding CreateUser}">Anlegen</Button>
+		</StackPanel>
+	</Grid>
+</UserControl>

@@ -1,0 +1,42 @@
+﻿<Window x:Class="Wpf.Example.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Wpf.Example"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+	<DockPanel LastChildFill="True">
+		<Ribbon DockPanel.Dock="Top" Title="Menüband" x:Name="rbnMain" SelectionChanged="rbnMain_SelectionChanged">
+			<Ribbon.ApplicationMenu>
+				<RibbonApplicationMenu KeyTip="M">
+					<RibbonApplicationMenuItem ImageSource="/img/save-file-icon-7.png" Header="Speichern" KeyTip="S" Command="{Binding SaveChanges}"/>
+				</RibbonApplicationMenu>
+			</Ribbon.ApplicationMenu>
+			<Ribbon.QuickAccessToolBar>
+				<RibbonQuickAccessToolBar>
+					<RibbonButton SmallImageSource="/img/save-file-icon-7.png" KeyTip="S" Command="{Binding SaveChanges}"/>
+				</RibbonQuickAccessToolBar>
+			</Ribbon.QuickAccessToolBar>
+			<RibbonTab Header="Start">
+				<!--0-->
+				<RibbonGroup Header="Einstellungen">
+				</RibbonGroup>
+			</RibbonTab>
+			<RibbonTab Header="Stammdaten">
+				<!--1-->
+
+			</RibbonTab>
+			<RibbonTab Header="User">
+				<!--2-->
+			</RibbonTab>
+			<RibbonTab Header="Räume"/>
+			<!--3-->
+			<RibbonTab Header="Schreibtische"/>
+			<!--4-->
+			<RibbonTab Header="Buchungen"/>
+			<!--5-->
+		</Ribbon>
+		<Grid DockPanel.Dock="Top" x:Name="grdMain"/>
+	</DockPanel>
+</Window>
