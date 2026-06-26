@@ -29,6 +29,10 @@ namespace Wpf.Example
 			for (int i = 0; i < ctrls.Count; i++)
 			{
 				IRibbonTabControl ctrl = ctrls[i];
+				if (ctrl == null)
+					throw new NullReferenceException(nameof(ctrl));
+				ctrl.OnInit(null!);
+
 				RibbonTabControlAttribute attr = ctrl.GetAttribute();
 				if (attr.Position == i)
 				{
@@ -45,7 +49,14 @@ namespace Wpf.Example
 			{
 				grdMain.Children.Clear();
 				var ctrl = tabControls[ribbon.SelectedIndex] as UIElement;
-				grdMain.Children.Add(ctrl);
+				var ictrl = ctrl as IRibbonTabControl;
+				if (ictrl != null)
+				{
+					ictrl.OnStart();
+					grdMain.Children.Add(ctrl);
+				}
+				else
+					throw new NullReferenceException(nameof(ictrl));
 			}
 		}
 }
