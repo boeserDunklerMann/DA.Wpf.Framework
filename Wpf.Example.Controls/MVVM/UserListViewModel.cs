@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using DA.SharedDeskPlanner.Model;
 using DA.SharedDeskPlanner.Model.Contracts;
+using DA.Wpf.Framework;
 using Microsoft.EntityFrameworkCore;
 
 namespace Wpf.Example.Controls.MVVM
@@ -8,12 +9,12 @@ namespace Wpf.Example.Controls.MVVM
 	/// <ChangeLog>
 	/// <Create Datum="08.05.2026" Entwickler="DA" />
 	/// </ChangeLog>
-	internal class UserListViewModel(ISharedDeskPlannerContext context) : BaseViewModel(context)
+	internal class UserListViewModel(ISharedDeskPlannerContext context, IDialogService dialogService) : BaseViewModel(context)
 	{
 		#region Bound lists & props
 		private User _newUser = BaseModel.Create<User>();
 		public User NewUser => _newUser;
-		
+
 		private User? _selectedUser;
 		public User? SelectedUser
 		{
@@ -54,30 +55,47 @@ namespace Wpf.Example.Controls.MVVM
 		#region Actions
 		private async void CmdDeleteUser()
 		{
-			if (dbcontext != null)
+			try
 			{
-				_selectedUser!.Deleted = true;
+				if (dbcontext != null)
+				{
+					_selectedUser!.Deleted = true;
 
-				await dbcontext.SaveChangesAsync();
-				await LoadUsersAsync();
+					await dbcontext.SaveChangesAsync();
+					await LoadUsersAsync();
+					dialogService.ShowInfo("Benutzer gelöscht.");
+				}
+				else
+					dialogService.ShowError("kein DB Context vorhanden");
 			}
-			else
-				throw new NullReferenceException(nameof(dbcontext));
+			catch (Exception ex)
+			{
+				dialogService.ShowError(ex.Message);
+			}
 		}
 		private async void CmdCreateUser()
 		{
-			if (dbcontext != null)
+			try
 			{
-				await dbcontext.Users.AddAsync(_newUser);
-				await dbcontext.SaveChangesAsync();
-				await LoadUsersAsync();
-				_newUser = BaseModel.Create<User>();
-				RaisePropChanged(nameof(NewUser));
+				if (dbcontext != null)
+				{
+					await dbcontext.Users.AddAsync(_newUser);
+					await dbcontext.SaveChangesAsync();
+					await LoadUsersAsync();
+					_newUser = BaseModel.Create<User>();
+					RaisePropChanged(nameof(NewUser));
+				}
+				else
+					dialogService.ShowError("kein DB Context vorhanden");
+
 			}
-			else
-				throw new NullReferenceException(nameof(dbcontext));
+			catch (Exception ex)
+			{
+				dialogService.ShowError(ex.Message);
+			}
 		}
 		#endregion
+		
 		#region private methods
 		private async Task LoadUsersAsync()
 		{
@@ -94,7 +112,7 @@ namespace Wpf.Example.Controls.MVVM
 					SelectedUser = _users.FirstOrDefault(u => u.ID == selectedId);
 			}
 			else
-				throw new NullReferenceException(nameof(dbcontext));
+				dialogService.ShowError("kein DB Context vorhanden");
 		}
 
 		#endregion

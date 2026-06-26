@@ -20,10 +20,10 @@ namespace Wpf.Example.Controls
 	public partial class UserListCtrl : UserControl, IRibbonTabControl
 	{
 		private UserListViewModel? vm;
-		public UserListCtrl(ISharedDeskPlannerContext ctx)
+		public UserListCtrl(ISharedDeskPlannerContext ctx, IDialogService dialogService)
 		{
 			InitializeComponent();
-			vm = new UserListViewModel(ctx);
+			vm = new UserListViewModel(ctx, dialogService);
 			DataContext = vm;
 		}
 

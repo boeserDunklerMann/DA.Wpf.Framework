@@ -32,6 +32,8 @@ namespace Wpf.Example
 				throw new NullReferenceException(nameof(connString));
 		
 			var ctx = new SharedDeskPlannerContext(connString);
+			var dlg = new DialogService();
+
 			List<IRibbonTabControl> ctrls = [];
 			//await Task.CompletedTask;
 
@@ -64,7 +66,7 @@ namespace Wpf.Example
 			}
 			typesWithAttribute.ForEach(t =>
 			{
-				if (Activator.CreateInstance(t, ctx) is IRibbonTabControl ctrl)
+				if (Activator.CreateInstance(t, ctx, dlg) is IRibbonTabControl ctrl)
 					ctrls.Add(ctrl);
 			});
 
@@ -89,6 +91,7 @@ namespace Wpf.Example
 		{
 			services.AddScoped<ISharedDeskPlannerContext, SharedDeskPlannerContext>();
 			services.AddTransient<MainWindow>();
+			services.AddSingleton<IDialogService, DialogService>();
 		}
 
 		protected override async void OnStartup(StartupEventArgs e)
