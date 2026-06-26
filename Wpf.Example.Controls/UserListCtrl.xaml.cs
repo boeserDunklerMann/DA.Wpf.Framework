@@ -1,6 +1,8 @@
-﻿using DA.Wpf.Framework;
+﻿using DA.SharedDeskPlanner.Model.Contracts;
+using DA.Wpf.Framework;
 using DA.Wpf.Framework.Attributes;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,20 +20,23 @@ namespace Wpf.Example.Controls
 	public partial class UserListCtrl : UserControl, IRibbonTabControl
 	{
 		private UserListViewModel? vm;
-		public UserListCtrl()
+		public UserListCtrl(ISharedDeskPlannerContext ctx)
 		{
 			InitializeComponent();
-			vm = DataContext as UserListViewModel;
+			vm = new UserListViewModel(ctx);
+			DataContext = vm;
 		}
-
-		public FrameworkElement CreateMyself() => new UserListCtrl();
 
 		public RibbonTabControlAttribute GetAttribute()
 		{
 			return GetType().GetCustomAttribute<RibbonTabControlAttribute>()!;
 		}
 
-		public void OnInit(DbContext ctx) => vm!.OnInit();
+		public void OnInit(IServiceCollection services)
+		{
+			services.AddTransient<UserListViewModel>();
+			vm!.OnInit();
+		}
 
 		public void OnStart() => vm!.OnStart();
 

@@ -1,6 +1,7 @@
 <Solution>
+  <Project Path="DA.SharedDeskPlanner.Model/DA.SharedDeskPlanner.Model.csproj" />
+  <Project Path="DA.SharedDeskPlanner.Validation/DA.SharedDeskPlanner.Validation.csproj" />
   <Project Path="DA.Wpf.Framework/DA.Wpf.Framework.csproj" Id="feafb07a-fec1-4da6-bd2a-dec0401ef964" />
   <Project Path="Wpf.Example.Controls/Wpf.Example.Controls.csproj" Id="f76454d9-67d1-44a9-b176-279dbec02c62" />
-  <Project Path="Wpf.Example.Model/Wpf.Example.Model.csproj" Id="a11bacdc-25ed-4182-9764-aabd4fe19a6b" />
   <Project Path="Wpf.Example/Wpf.Example.csproj" Id="03e39551-53fc-4b88-973e-4c7ab948f44a" />
 </Solution>

@@ -12,8 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DA.SharedDeskPlanner.Model\DA.SharedDeskPlanner.Model.csproj" />
     <ProjectReference Include="..\DA.Wpf.Framework\DA.Wpf.Framework.csproj" />
-    <ProjectReference Include="..\Wpf.Example.Model\Wpf.Example.Model.csproj" />
   </ItemGroup>
 
 </Project>

@@ -7,9 +7,6 @@
 			 xmlns:vm="clr-namespace:Wpf.Example.Controls.MVVM"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-	<UserControl.DataContext>
-		<vm:UserListViewModel />
-	</UserControl.DataContext>
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="30"/>

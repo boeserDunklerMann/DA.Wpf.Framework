@@ -15,7 +15,6 @@
   <ItemGroup>
     <ProjectReference Include="..\DA.Wpf.Framework\DA.Wpf.Framework.csproj" />
     <ProjectReference Include="..\Wpf.Example.Controls\Wpf.Example.Controls.csproj" />
-    <ProjectReference Include="..\Wpf.Example.Model\Wpf.Example.Model.csproj" />
   </ItemGroup>
 
   <ItemGroup>

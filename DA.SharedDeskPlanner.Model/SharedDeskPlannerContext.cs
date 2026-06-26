@@ -7,8 +7,9 @@ namespace DA.SharedDeskPlanner.Model
 	/// <ChangeLog>
 	/// <Create Datum="18.02.2026" Entwickler="DA" />
 	/// <Change Datum="18.02.2026" Entwickler="DA">User and Booking added</Change>
+	/// <Change Datum="26.06.2026" Entwickler="DA">Interface ISharedDeskPlanner added</Change>
 	/// </ChangeLog>
-	public class SharedDeskPlannerContext : DbContext
+	public class SharedDeskPlannerContext : DbContext, ISharedDeskPlannerContext
 	{
 		private string _connectionString = "";
 		private IConfiguration? _configuration;
@@ -18,16 +19,16 @@ namespace DA.SharedDeskPlanner.Model
 		public DbSet<User> Users { get; set; }
 		public DbSet<Booking> Bookings { get; set; }
 
-		public SharedDeskPlannerContext(IConfiguration? cfg=null):base()
+		public SharedDeskPlannerContext(IConfiguration? cfg = null) : base()
 		{
-			if (cfg!=null)
+			if (cfg != null)
 			{
 				_configuration = cfg;
 				_connectionString = _configuration["ConnectionStrings:da_sdp_db"]!;
 			}
 		}
 
-		public SharedDeskPlannerContext(string connString):base()
+		public SharedDeskPlannerContext(string connString) : base()
 		{
 			_connectionString = connString;
 		}
@@ -46,8 +47,8 @@ namespace DA.SharedDeskPlanner.Model
 			// https://stackoverflow.com/questions/74060289/mysqlconnection-open-system-invalidcastexception-object-cannot-be-cast-from-d
 			// MariaDB 11+ doesnt work because of nullable PKs?
 			optionsBuilder.UseMySQL(_connectionString);  // CaptainTrips works with MariaDB 10
-														//this.SavingChanges += OnSavingChanges;
-														//this.ChangeTracker.StateChanged += OnStateChanged;
+														 //this.SavingChanges += OnSavingChanges;
+														 //this.ChangeTracker.StateChanged += OnStateChanged;
 		}
 		private void OnStateChanged(object? sender, Microsoft.EntityFrameworkCore.ChangeTracking.EntityStateChangedEventArgs e)
 		{
@@ -106,7 +107,7 @@ namespace DA.SharedDeskPlanner.Model
 				ent.Property(b => b.Name).IsRequired();
 				ent.Property(b => b.ChangeDate).HasConversion(
 					v => v.HasValue ? v.Value.UtcDateTime : (DateTime?)null,    // in die DB als UTC
-					v => new DateTimeOffset(v.HasValue ? v.Value : DateTime.MinValue, TimeSpan.Zero));	// aus der DB als Offset 0
+					v => new DateTimeOffset(v.HasValue ? v.Value : DateTime.MinValue, TimeSpan.Zero));  // aus der DB als Offset 0
 			});
 		}
 

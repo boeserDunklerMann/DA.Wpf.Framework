@@ -1,5 +1,8 @@
-﻿using DA.Wpf.Framework;
+﻿using DA.SharedDeskPlanner.Model;
+using DA.SharedDeskPlanner.Model.Contracts;
+using DA.Wpf.Framework;
 using DA.Wpf.Framework.Attributes;
+using Microsoft.Extensions.DependencyInjection;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -19,36 +22,39 @@ namespace Wpf.Example
 	/// </summary>
 	public partial class MainWindow : Window
 	{
-		private List<IRibbonTabControl> tabControls = [];
+		private readonly List<IRibbonTabControl> _tabControls = [];
+
 		public MainWindow()
 		{
-			InitializeComponent();
-			var ctrls = Common.GetRibbonTabControlsAsync().Result;
-			rbnMain.Items.Clear();
-			tabControls.Clear();
-			for (int i = 0; i < ctrls.Count; i++)
-			{
-				IRibbonTabControl ctrl = ctrls[i];
-				if (ctrl == null)
-					throw new NullReferenceException(nameof(ctrl));
-				ctrl.OnInit(null!);
 
+			InitializeComponent();
+			rbnMain.Items.Clear();
+		}
+		
+		public void SetTabControls (List<IRibbonTabControl> tabControls)
+		{
+			_tabControls.Clear();
+			_tabControls.AddRange(tabControls);
+			int i = 0;
+			tabControls.ForEach(ctrl =>
+			{
 				RibbonTabControlAttribute attr = ctrl.GetAttribute();
 				if (attr.Position == i)
 				{
 					RibbonTab tab = new() { Header = attr.Heading };
 					rbnMain.Items.Add(tab);
-					tabControls.Add(ctrl);
 				}
-			}
+				i++;
+			});
 		}
+
 		private void rbnMain_SelectionChanged(object sender, SelectionChangedEventArgs e) 
 		{
 			Ribbon? ribbon = sender as Ribbon;
-			if (ribbon != null)
+			if (ribbon != null && _tabControls.Count>0)
 			{
 				grdMain.Children.Clear();
-				var ctrl = tabControls[ribbon.SelectedIndex] as UIElement;
+				var ctrl = _tabControls[ribbon.SelectedIndex] as UIElement;
 				var ictrl = ctrl as IRibbonTabControl;
 				if (ictrl != null)
 				{

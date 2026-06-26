@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
-using Wpf.Example.Model;
+using DA.SharedDeskPlanner.Model;
+using DA.SharedDeskPlanner.Model.Contracts;
 
 namespace Wpf.Example.Controls.MVVM
 {
@@ -10,6 +11,11 @@ namespace Wpf.Example.Controls.MVVM
 	{
 		#region Bound lists
 		private ObservableCollection<User> _users = [];
+
+		public UserListViewModel(ISharedDeskPlannerContext context):base(context)
+		{
+		}
+
 		public ObservableCollection<User> Users => _users;
 
 		public override void OnInit()

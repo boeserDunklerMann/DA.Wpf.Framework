@@ -1,5 +1,6 @@
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 
 namespace DA.Wpf.Framework
@@ -13,10 +14,10 @@ namespace DA.Wpf.Framework
 	public interface IRibbonTabControl
 	{
 		/// <summary>
-		/// Will be called before Initializing, after loading the conrol
+		/// Will be called before Initializing, after loading the conrol.
+		/// Here you need to register your services (eg. the ViewModel)
 		/// </summary>
-		/// <param name="ctx">a databasecontext</param>
-		void OnInit(DbContext ctx);
+		void OnInit(IServiceCollection services);
 		/// <summary>
 		/// will be called after Initializing the control
 		/// </summary>
@@ -31,10 +32,10 @@ namespace DA.Wpf.Framework
 		/// </summary>
 		/// <returns></returns>
 		Attributes.RibbonTabControlAttribute GetAttribute();
-		/// <summary>
-		/// creates the instance of the control
-		/// </summary>
-		/// <returns></returns>
-		FrameworkElement CreateMyself();
+		///// <summary>
+		///// creates the instance of the control
+		///// </summary>
+		///// <returns></returns>
+		//FrameworkElement CreateMyself();
 	}
 }
