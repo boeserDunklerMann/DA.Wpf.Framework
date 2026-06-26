@@ -5,15 +5,15 @@ namespace Wpf.Example.Controls.MVVM
 {
 	internal abstract class BaseViewModel : ObservableObject
 	{
-		protected DbContext? dbcontext;
+		protected ISharedDeskPlannerContext? dbcontext;
 
 		protected BaseViewModel(ISharedDeskPlannerContext context)
 		{
 			// TODO DA: get context from DI or so
-			dbcontext = (DbContext)context;
+			dbcontext = context;
 		}
 
-		public abstract void OnInit();
+		public abstract Task OnInitAsync();
 		public abstract void OnStart();
 		public abstract void OnStop();
 	}

@@ -3,6 +3,7 @@ using DA.SharedDeskPlanner.Model.Contracts;
 using DA.Wpf.Framework;
 using DA.Wpf.Framework.Attributes;
 using Microsoft.Extensions.DependencyInjection;
+using System.Collections.ObjectModel;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -22,7 +23,7 @@ namespace Wpf.Example
 	/// </summary>
 	public partial class MainWindow : Window
 	{
-		private readonly List<IRibbonTabControl> _tabControls = [];
+		private readonly ObservableCollection<IRibbonTabControl> _tabControls = [];
 
 		public MainWindow()
 		{
@@ -30,28 +31,28 @@ namespace Wpf.Example
 			InitializeComponent();
 			rbnMain.Items.Clear();
 		}
-		
-		public void SetTabControls (List<IRibbonTabControl> tabControls)
+
+		public void SetTabControls(IEnumerable<IRibbonTabControl> tabControls)
 		{
+			// SORTIERUNG: Das ist der entscheidende Fix!
+			// Wir sortieren alle Tabs basierend auf ihrer Position, bevor wir sie verarbeiten.
+			var sortedTabs = tabControls.OrderBy(c => c.GetAttribute().Position).ToList();
+
 			_tabControls.Clear();
-			_tabControls.AddRange(tabControls);
-			int i = 0;
-			tabControls.ForEach(ctrl =>
+			sortedTabs.ForEach(_tabControls.Add);
+			rbnMain.Items.Clear();
+			sortedTabs.ForEach(t =>
 			{
-				RibbonTabControlAttribute attr = ctrl.GetAttribute();
-				if (attr.Position == i)
-				{
-					RibbonTab tab = new() { Header = attr.Heading };
-					rbnMain.Items.Add(tab);
-				}
-				i++;
+				RibbonTabControlAttribute attr = t.GetAttribute();
+				RibbonTab tab = new() { Header = attr.Heading };
+				rbnMain.Items.Add(tab);
 			});
 		}
 
-		private void rbnMain_SelectionChanged(object sender, SelectionChangedEventArgs e) 
+		private void rbnMain_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
 			Ribbon? ribbon = sender as Ribbon;
-			if (ribbon != null && _tabControls.Count>0)
+			if (ribbon != null && _tabControls.Count > 0)
 			{
 				grdMain.Children.Clear();
 				var ctrl = _tabControls[ribbon.SelectedIndex] as UIElement;
@@ -65,5 +66,5 @@ namespace Wpf.Example
 					throw new NullReferenceException(nameof(ictrl));
 			}
 		}
-}
+	}
 }

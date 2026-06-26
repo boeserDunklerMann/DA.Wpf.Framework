@@ -17,7 +17,7 @@ namespace DA.Wpf.Framework
 		/// Will be called before Initializing, after loading the conrol.
 		/// Here you need to register your services (eg. the ViewModel)
 		/// </summary>
-		void OnInit(IServiceCollection services);
+		Task OnInitAsync(IServiceCollection services);
 		/// <summary>
 		/// will be called after Initializing the control
 		/// </summary>
@@ -32,10 +32,6 @@ namespace DA.Wpf.Framework
 		/// </summary>
 		/// <returns></returns>
 		Attributes.RibbonTabControlAttribute GetAttribute();
-		///// <summary>
-		///// creates the instance of the control
-		///// </summary>
-		///// <returns></returns>
-		//FrameworkElement CreateMyself();
+
 	}
 }

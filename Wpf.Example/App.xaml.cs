@@ -2,14 +2,13 @@
 using DA.SharedDeskPlanner.Model.Contracts;
 using DA.Wpf.Framework;
 using DA.Wpf.Framework.Attributes;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Org.BouncyCastle.Asn1.Cms;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Controls.Ribbon;
 
 namespace Wpf.Example
 {
@@ -18,24 +17,23 @@ namespace Wpf.Example
 	/// </summary>
 	public partial class App : Application
 	{
-		private readonly List<IRibbonTabControl> tabControls = [];
-		private readonly IServiceProvider serviceProvider;
+		private readonly ObservableCollection<IRibbonTabControl> tabControls = [];
+		private IServiceProvider? serviceProvider;
 		public App()
 		{
-#pragma warning disable 4014
-			var services = new ServiceCollection();
-			ConfigureServices(services);
-			LoadAndInitPluginsAsync(services);
-			serviceProvider = services.BuildServiceProvider();
-#pragma warning restore 4014
 		}
 
 		private async Task LoadAndInitPluginsAsync(ServiceCollection services)
 		{
-			//var ctrls =  Common.GetRibbonTabControlsAsync().Result;
-			var ctx = new SharedDeskPlannerContext();
+			var cfg = GetConfiguration();
+			services.AddSingleton<IConfiguration>(cfg);
+			string? connString = cfg.GetConnectionString("default");
+			if (connString == null)
+				throw new NullReferenceException(nameof(connString));
+		
+			var ctx = new SharedDeskPlannerContext(connString);
 			List<IRibbonTabControl> ctrls = [];
-			await Task.CompletedTask;
+			//await Task.CompletedTask;
 
 			// 1. Pfad zum bin-Verzeichnis ermitteln
 			string binPath = AppContext.BaseDirectory;
@@ -76,10 +74,16 @@ namespace Wpf.Example
 				IRibbonTabControl ctrl = ctrls[i];
 				if (ctrl == null)
 					throw new NullReferenceException(nameof(ctrl));
-				ctrl.OnInit(services);
+				await ctrl.OnInitAsync(services);
 				tabControls.Add(ctrl);
 			}
 
+		}
+
+		private IConfiguration GetConfiguration()
+		{
+			var cfgBuilder = new ConfigurationBuilder().SetBasePath(AppDomain.CurrentDomain.BaseDirectory).AddJsonFile("appsettings.local.json", false, true);
+			return cfgBuilder.Build();
 		}
 		private void ConfigureServices(IServiceCollection services)
 		{
@@ -87,9 +91,15 @@ namespace Wpf.Example
 			services.AddTransient<MainWindow>();
 		}
 
-		protected override void OnStartup(StartupEventArgs e)
+		protected override async void OnStartup(StartupEventArgs e)
 		{
 			base.OnStartup(e);
+
+			var services = new ServiceCollection();
+			ConfigureServices(services);
+			await LoadAndInitPluginsAsync(services);
+			serviceProvider = services.BuildServiceProvider();
+
 			var mainWindow = serviceProvider.GetRequiredService<MainWindow>();
 			mainWindow.SetTabControls(tabControls);
 			mainWindow.Show();

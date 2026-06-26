@@ -32,10 +32,9 @@ namespace Wpf.Example.Controls
 			return GetType().GetCustomAttribute<RibbonTabControlAttribute>()!;
 		}
 
-		public void OnInit(IServiceCollection services)
+		public async Task OnInitAsync(IServiceCollection services)
 		{
-			services.AddTransient<UserListViewModel>();
-			vm!.OnInit();
+			await vm!.OnInitAsync();
 		}
 
 		public void OnStart() => vm!.OnStart();
