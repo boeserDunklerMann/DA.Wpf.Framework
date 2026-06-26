@@ -12,6 +12,10 @@ using System.Windows;
 
 namespace Wpf.Example
 {
+	/// <ChangeLog>
+	/// <Create Datum="??.??.2026" Entwickler="DA" />
+	/// <Change Datum="26.06.2026" Entwickler="DA">Added many DI stuff</Change>	
+	/// </ChangeLog>
 	/// <summary>
 	/// Interaction logic for App.xaml
 	/// </summary>
@@ -30,12 +34,17 @@ namespace Wpf.Example
 			string? connString = cfg.GetConnectionString("default");
 			if (connString == null)
 				throw new NullReferenceException(nameof(connString));
-		
-			var ctx = new SharedDeskPlannerContext(connString);
-			var dlg = new DialogService();
+
+			//var ctx = new SharedDeskPlannerContext(connString);
+			//var dlg = new DialogService();
+			services.AddScoped<ISharedDeskPlannerContext>(provider =>
+			{
+				return new SharedDeskPlannerContext(connString);
+			});
+
+			services.AddSingleton<IDialogService, DialogService>();
 
 			List<IRibbonTabControl> ctrls = [];
-			//await Task.CompletedTask;
 
 			// 1. Pfad zum bin-Verzeichnis ermitteln
 			string binPath = AppContext.BaseDirectory;
@@ -66,8 +75,18 @@ namespace Wpf.Example
 			}
 			typesWithAttribute.ForEach(t =>
 			{
-				if (Activator.CreateInstance(t, ctx, dlg) is IRibbonTabControl ctrl)
+				// t im DI Container registrieren
+				services.AddTransient(t);
+				//ctrls.Add(ctrl);
+			});
+			serviceProvider = services.BuildServiceProvider();
+			typesWithAttribute.ForEach(t =>
+			{
+				// Der Provider weiß jetzt, dass er für 't' auch IDialogService mitliefern muss!
+				if (serviceProvider.GetRequiredService(t) is IRibbonTabControl ctrl)
+				{
 					ctrls.Add(ctrl);
+				}
 			});
 
 			tabControls.Clear();
@@ -89,7 +108,6 @@ namespace Wpf.Example
 		}
 		private void ConfigureServices(IServiceCollection services)
 		{
-			services.AddScoped<ISharedDeskPlannerContext, SharedDeskPlannerContext>();
 			services.AddTransient<MainWindow>();
 			services.AddSingleton<IDialogService, DialogService>();
 		}
@@ -108,5 +126,4 @@ namespace Wpf.Example
 			mainWindow.Show();
 		}
 	}
-
 }

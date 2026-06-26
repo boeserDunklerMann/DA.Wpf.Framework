@@ -1,0 +1,40 @@
+﻿<UserControl x:Class="Wpf.Example.Controls.Inventory"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Wpf.Example.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="30"/>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="150"/>
+		</Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="*"/>
+		</Grid.ColumnDefinitions>
+		<Label Grid.Row="0">Inventar</Label>
+		<DataGrid Grid.Row="1" Width="auto" Background="LightCoral" ItemsSource="{Binding Inventory}" AutoGenerateColumns="False"
+				  CanUserAddRows="False" CanUserDeleteRows="False" SelectedItem="{Binding SelectedInventoryItem}">
+			<DataGrid.Columns>
+				<DataGridTextColumn Header="Bezeichnung" Binding="{Binding Name}"/>
+				<DataGridTextColumn Header="angelegt am" Binding="{Binding CreationDate}"/>
+				<DataGridTextColumn Header="letzte Änderung" Binding="{Binding ChangeDate}"/>
+				<DataGridTemplateColumn>
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<Button Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:Inventory}}, Path=DataContext.DeleteInventoryItem}">delete</Button>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+			</DataGrid.Columns>
+		</DataGrid>
+		<StackPanel Orientation="Vertical" Grid.Row="2">
+			<Label>Bezeichnung</Label>
+			<TextBox Text="{Binding NewInventoryItem.Name}"/>
+			<Button Command="{Binding CreateInventoryItem}">Anlegen</Button>
+		</StackPanel>
+	</Grid>
+</UserControl>

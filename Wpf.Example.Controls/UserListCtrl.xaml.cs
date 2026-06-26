@@ -1,10 +1,8 @@
 ﻿using DA.SharedDeskPlanner.Model.Contracts;
 using DA.Wpf.Framework;
 using DA.Wpf.Framework.Attributes;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
-using System.Windows;
 using System.Windows.Controls;
 using Wpf.Example.Controls.MVVM;
 
@@ -28,9 +26,7 @@ namespace Wpf.Example.Controls
 		}
 
 		public RibbonTabControlAttribute GetAttribute()
-		{
-			return GetType().GetCustomAttribute<RibbonTabControlAttribute>()!;
-		}
+			=> GetType().GetCustomAttribute<RibbonTabControlAttribute>()!;
 
 		public async Task OnInitAsync(IServiceCollection services)
 		{

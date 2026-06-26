@@ -1,8 +1,8 @@
-﻿using System.Collections.ObjectModel;
-using DA.SharedDeskPlanner.Model;
+﻿using DA.SharedDeskPlanner.Model;
 using DA.SharedDeskPlanner.Model.Contracts;
 using DA.Wpf.Framework;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.ObjectModel;
 
 namespace Wpf.Example.Controls.MVVM
 {
@@ -33,9 +33,6 @@ namespace Wpf.Example.Controls.MVVM
 
 		public override async Task OnInitAsync()
 		{
-			if (dbcontext == null)
-				throw new NullReferenceException(nameof(dbcontext));
-
 			await LoadUsersAsync();
 		}
 
