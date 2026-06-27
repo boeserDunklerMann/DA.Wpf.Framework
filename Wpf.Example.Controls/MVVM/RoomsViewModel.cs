@@ -10,14 +10,10 @@ namespace Wpf.Example.Controls.MVVM
 	/// <ChangeLog>
 	/// <Create Datum="27.06.2026" Entwickler="DA" />
 	/// </ChangeLog>
-	internal class RoomsViewModel:BaseViewModel
+	internal class RoomsViewModel(ISharedDeskPlannerContext ctx, IDialogService dialogService) : BaseViewModel(ctx)
 	{
 		// Das DataGrid bindet an diese flache Liste
 		public ObservableCollection<TreeGridNode> FlatView { get; set; } = new ObservableCollection<TreeGridNode>();
-
-		public RoomsViewModel(ISharedDeskPlannerContext ctx, IDialogService dialogService):base(ctx)
-		{
-		}
 
 		private async Task LoadRoomsAsync()
 		{
@@ -26,6 +22,7 @@ namespace Wpf.Example.Controls.MVVM
 				var raeume = await dbcontext.Rooms
 					.Include(r => r.Desks)
 					.Where(r => !r.Deleted).ToListAsync();
+				FlatView.Clear();
 				raeume.ForEach(r =>
 				{
 					TreeGridNode topNode = new() { Name = r.Name, Level = 0 };
@@ -38,6 +35,8 @@ namespace Wpf.Example.Controls.MVVM
 					AddNodeToFlatView(topNode);
 				});
 			}
+			else
+				dialogService.ShowError("keinen DB context gefunden.");
 		}
 		
 
@@ -97,6 +96,8 @@ namespace Wpf.Example.Controls.MVVM
 				{
 					RemoveChildren(child);
 				}
+				// Das Event sauber abmelden, wenn der Knoten aus der FlatView fliegt
+				child.ExpansionChanged -= Node_ExpansionChanged;
 				FlatView.Remove(child);
 			}
 		}

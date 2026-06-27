@@ -35,8 +35,6 @@ namespace Wpf.Example
 			if (connString == null)
 				throw new NullReferenceException(nameof(connString));
 
-			//var ctx = new SharedDeskPlannerContext(connString);
-			//var dlg = new DialogService();
 			services.AddScoped<ISharedDeskPlannerContext>(provider =>
 			{
 				return new SharedDeskPlannerContext(connString);
