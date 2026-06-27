@@ -111,7 +111,7 @@
 
 						<!-- Name des Schreibtischs -->
 						<TextBlock Text="Bezeichnung / Name" FontSize="12" FontWeight="Medium" Foreground="#4B5563" Margin="0,0,0,6"/>
-						<TextBox Text="{Binding DeskName, UpdateSourceTrigger=PropertyChanged}" 
+						<TextBox Text="{Binding NewDesk.Name, UpdateSourceTrigger=PropertyChanged}" 
                              Height="36" Padding="8,4" VerticalContentAlignment="Center"
                              BorderBrush="#D1D5DB" Margin="0,0,0,16">
 							<TextBox.Resources>
@@ -136,15 +136,21 @@
 						</ComboBox>
 
 						<!-- Status / Typ (Höhenverstellbar etc.) -->
-						<TextBlock Text="Ausstattungstyp" FontSize="12" FontWeight="Medium" Foreground="#4B5563" Margin="0,0,0,6"/>
-						<StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+						<TextBlock Text="Ausstattung" FontSize="12" FontWeight="Medium" Foreground="#4B5563" Margin="0,0,0,6"/>
+						<!--<StackPanel Orientation="Horizontal" Margin="0,0,0,16">
 							<RadioButton Content="Standard" IsChecked="{Binding IsStandardDesk}" Margin="0,0,16,0" VerticalAlignment="Center"/>
 							<RadioButton Content="Höhenverstellbar" IsChecked="{Binding IsHeightAdjustable}" VerticalAlignment="Center"/>
-						</StackPanel>
+						</StackPanel>-->
+							<DataGrid Margin="0,0,0,16" ItemsSource="{Binding AvailableInventories}" AutoGenerateColumns="False">
+								<DataGrid.Columns>
+									<DataGridCheckBoxColumn Binding="{Binding IsChecked}" Header="Auswahl"/>
+									<DataGridTextColumn Binding="{Binding Name}" Header="Bezeichnung"/>
+								</DataGrid.Columns>
+							</DataGrid>
 
 						<!-- Bemerkungen -->
 						<TextBlock Text="Bemerkungen / Notizen" FontSize="12" FontWeight="Medium" Foreground="#4B5563" Margin="0,0,0,6"/>
-						<TextBox Text="{Binding Remarks}" AcceptsReturn="True" Height="100" TextWrapping="Wrap" 
+						<TextBox Text="{Binding NewDesk.Remarks}" AcceptsReturn="True" Height="100" TextWrapping="Wrap" 
                              Padding="8" VerticalScrollBarVisibility="Auto" BorderBrush="#D1D5DB">
 							<TextBox.Resources>
 								<Style TargetType="Border">
@@ -152,6 +158,7 @@
 								</Style>
 							</TextBox.Resources>
 						</TextBox>
+							<Button Command="{Binding CreateDesk}">Anlegen</Button>
 					</StackPanel>
 				</Border>
 			</Grid>
