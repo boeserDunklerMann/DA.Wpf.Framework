@@ -23,14 +23,11 @@ namespace Wpf.Example
 	{
 		private readonly ObservableCollection<IRibbonTabControl> tabControls = [];
 		private IServiceProvider? serviceProvider;
-		public App()
-		{
-		}
 
 		private async Task LoadAndInitPluginsAsync(ServiceCollection services)
 		{
 			var cfg = GetConfiguration();
-			services.AddSingleton<IConfiguration>(cfg);
+			services.AddSingleton(cfg);
 			string? connString = cfg.GetConnectionString("default");
 			if (connString == null)
 				throw new NullReferenceException(nameof(connString));

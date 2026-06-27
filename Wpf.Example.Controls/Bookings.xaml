@@ -1,0 +1,41 @@
+﻿<UserControl x:Class="Wpf.Example.Controls.Bookings"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Wpf.Example.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+	<Grid>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="*"/>
+		</Grid.ColumnDefinitions>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="30"/>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="150"/>
+		</Grid.RowDefinitions>
+		<Label Grid.Row="0">Buchungen</Label>
+
+		<DataGrid Grid.Row="1" Width="auto" Background="LightGreen" ItemsSource="{Binding Bookings}" CanUserAddRows="False" CanUserDeleteRows="False"
+				  SelectedItem="{Binding SelectedBooking}" AutoGenerateColumns="False">
+			<DataGrid.Columns>
+				<DataGridTextColumn Header="Bezeichnung" Binding="{Binding Name}"/>
+				<DataGridTextColumn Header="Schreibtisch" Binding="{Binding Desk.Name}"/>
+				<DataGridTextColumn Header="Benutzer" Binding="{Binding User.Name}"/>
+				<DataGridTextColumn Header="angelegt am" Binding="{Binding CreationDate, StringFormat=\{0:dd.MM.yyyy\}}"/>
+				<DataGridTextColumn Header="letzte Änderung" Binding="{Binding ChangeDate, StringFormat=\{0:dd.MM.yyyy\}}"/>
+				<DataGridTextColumn Header="gebucht von" Binding="{Binding BookingStart, StringFormat=\{0:dd.MM.yyyy\}}"/>
+				<DataGridTextColumn Header="gebucht bis" Binding="{Binding BookingEnd, StringFormat=\{0:dd.MM.yyyy\}}"/>
+				<DataGridTemplateColumn Header="Löschen">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<Button Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:Bookings}}, Path=DataContext.DeleteBooking}">delete</Button>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+			</DataGrid.Columns>
+		</DataGrid>
+
+	</Grid>
+</UserControl>
