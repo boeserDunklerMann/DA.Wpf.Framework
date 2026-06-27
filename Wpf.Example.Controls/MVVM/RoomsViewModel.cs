@@ -1,5 +1,7 @@
-﻿using DA.SharedDeskPlanner.Model.Contracts;
+﻿using DA.SharedDeskPlanner.Model;
+using DA.SharedDeskPlanner.Model.Contracts;
 using DA.Wpf.Framework;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.ObjectModel;
 using Wpf.Example.Controls.Model;
 
@@ -15,27 +17,29 @@ namespace Wpf.Example.Controls.MVVM
 
 		public RoomsViewModel(ISharedDeskPlannerContext ctx, IDialogService dialogService):base(ctx)
 		{
-			LoadDemoData();
 		}
 
-		private void LoadDemoData()
+		private async Task LoadRoomsAsync()
 		{
-			// Beispiel-Daten aufbauen
-			var root1 = new TreeGridNode { Name = "Projekt A", ExtraInfo = "Hauptordner", Level = 0 };
-			var child1 = new TreeGridNode { Name = "Spezifikation.docx", ExtraInfo = "64 KB", Level = 1 };
-			var child2 = new TreeGridNode { Name = "Architektur", ExtraInfo = "Ordner", Level = 1 };
-			var subChild = new TreeGridNode { Name = "Diagramm.png", ExtraInfo = "1.2 MB", Level = 2 };
-
-			child2.Children.Add(subChild);
-			root1.Children.Add(child1);
-			root1.Children.Add(child2);
-
-			var root2 = new TreeGridNode { Name = "Projekt B", ExtraInfo = "Inaktiv", Level = 0 };
-
-			// Nur die Root-Elemente initial in die flache Liste werfen
-			AddNodeToFlatView(root1);
-			AddNodeToFlatView(root2);
+			if (dbcontext != null)
+			{
+				var raeume = await dbcontext.Rooms
+					.Include(r => r.Desks)
+					.Where(r => !r.Deleted).ToListAsync();
+				raeume.ForEach(r =>
+				{
+					TreeGridNode topNode = new() { Name = r.Name, Level = 0 };
+					if (r.Desks != null)
+						foreach (var d in r.Desks)
+						{
+							TreeGridNode deskNode = new() { Name = d.Name, ExtraInfo = d.Remarks!, Level = 1 };
+							topNode.Children.Add(deskNode);
+						}
+					AddNodeToFlatView(topNode);
+				});
+			}
 		}
+		
 
 		private void AddNodeToFlatView(TreeGridNode node)
 		{
@@ -99,7 +103,7 @@ namespace Wpf.Example.Controls.MVVM
 
 		public override async Task OnInitAsync()
 		{
-			await Task.CompletedTask;
+			await LoadRoomsAsync();
 		}
 
 		public override async void OnStart()
