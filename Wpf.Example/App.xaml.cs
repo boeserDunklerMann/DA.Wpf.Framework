@@ -109,6 +109,10 @@ namespace Wpf.Example
 
 		protected override async void OnStartup(StartupEventArgs e)
 		{
+			FrameworkElement.LanguageProperty.OverrideMetadata(
+				typeof(FrameworkElement),
+				new FrameworkPropertyMetadata(System.Windows.Markup.XmlLanguage.GetLanguage(System.Globalization.CultureInfo.CurrentCulture.IetfLanguageTag)));
+
 			base.OnStartup(e);
 
 			var services = new ServiceCollection();

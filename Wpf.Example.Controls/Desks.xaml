@@ -1,0 +1,161 @@
+﻿<UserControl x:Class="Wpf.Example.Controls.Desks"
+			 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:local="clr-namespace:Wpf.Example.Controls"
+			 mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+	<Grid>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="*"/>
+		</Grid.ColumnDefinitions>
+		<Grid.RowDefinitions>
+			<!-- das Datagrid -->
+			<RowDefinition Height="2*" MinHeight="150"/>
+			<!-- der Splitter -->
+			<RowDefinition Height="auto"/>
+			<!-- Neuanlage -->
+			<RowDefinition Height="3*" MinHeight="250"/>
+		</Grid.RowDefinitions>
+		
+		<DataGrid Grid.Row="0" Width="auto" Background="LightCyan" ItemsSource="{Binding Desktops}" CanUserAddRows="False" CanUserDeleteRows="False"
+				  SelectedItem="{Binding SelectedDesk}" AutoGenerateColumns="False">
+			<DataGrid.Columns>
+				<DataGridTextColumn Header="Bezeichnung" Binding="{Binding Name}"/>
+				<DataGridTextColumn Header="Raum" Binding="{Binding Room.Name}"/>
+				<DataGridTextColumn Header="angelegt am" Binding="{Binding CreationDate}"/>
+				<DataGridTextColumn Header="letzte Änderung" Binding="{Binding ChangeDate}"/>
+				<DataGridTemplateColumn Header="Inventar">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<!-- Ein Expander spart Platz im DataGrid. Er öffnet sich nach unten -->
+							<Expander Header="Inventar anzeigen..." Background="Transparent" BorderThickness="0" Padding="2" IsExpanded="False">
+								<!-- Der TreeView für die hierarchischen Inventory-Items -->
+								<TreeView ItemsSource="{Binding Inventory}" Background="Transparent" BorderThickness="0">
+									<TreeView.ItemTemplate>
+										<HierarchicalDataTemplate>
+											<StackPanel Orientation="Horizontal" Margin="2">
+												<!-- Beispiel: Icon/Symbol, Name und Extra-Info -->
+												<TextBlock Text="📦" Margin="0,0,5,0" VerticalAlignment="Center"/>
+												<TextBlock Text="{Binding Name}" FontWeight="Medium" VerticalAlignment="Center"/>
+											</StackPanel>
+										</HierarchicalDataTemplate>
+									</TreeView.ItemTemplate>
+								</TreeView>
+							</Expander>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+				<DataGridTemplateColumn Header="Löschen">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<Button Command="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:Desks}}, Path=DataContext.DeleteDesk}">delete</Button>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+			</DataGrid.Columns>
+		</DataGrid>
+		<!-- ============================================================================== -->
+		<!-- MITTE: DER GRIDSPLITTER -->
+		<!-- ============================================================================== -->
+		<!-- HorizontalAlignment="Stretch" sorgt dafür, dass er über die gesamte Breite geht.
+         ResizeBehavior="PreviousAndNext" teilt den Platz zwischen Zeile 0 und Zeile 2 auf. -->
+		<GridSplitter Grid.Row="1" 
+                  Height="6" 
+                  HorizontalAlignment="Stretch" 
+                  VerticalAlignment="Center"
+                  Background="#E5E7EB" 
+                  ShowsPreview="False"
+                  ResizeBehavior="PreviousAndNext"
+                  Cursor="SizeNS"/>
+
+		<!-- Neuanlage -->
+		<ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+		<Grid Margin="24" Grid.Row="2">
+			<Grid.RowDefinitions>
+				<!-- Header-Bereich -->
+				<RowDefinition Height="Auto"/>
+				<!-- Hauptinhalt (Split-Ansicht) -->
+				<RowDefinition Height="*"/>
+				<!-- Button-Leiste unten -->
+				<RowDefinition Height="Auto"/>
+			</Grid.RowDefinitions>
+
+			<!-- ============================================================================== -->
+			<!-- HEADER -->
+			<!-- ============================================================================== -->
+			<StackPanel Grid.Row="0" Margin="0,0,0,24">
+				<TextBlock Text="Neuen Schreibtisch anlegen" FontSize="22" FontWeight="SemiBold" Foreground="#111827"/>
+				<TextBlock Text="Richten Sie einen neuen Arbeitsplatz ein und weisen Sie direkt das vorhandene Inventar zu." FontSize="13" Foreground="#6B7280" Margin="0,4,0,0"/>
+				<Separator Background="#E5E7EB" Margin="0,16,0,0"/>
+			</StackPanel>
+
+			<!-- ============================================================================== -->
+			<!-- MAIN CONTENT (Split-View) -->
+			<!-- ============================================================================== -->
+			<Grid Grid.Row="1" Margin="0,0,0,16">
+				<Grid.ColumnDefinitions>
+					<!-- Linke Spalte: Stammdaten -->
+					<ColumnDefinition Width="4*"/>
+					<!-- Trenner -->
+					<ColumnDefinition Width="24"/>
+					<!-- Rechte Spalte: Inventar -->
+					<ColumnDefinition Width="5*"/>
+				</Grid.ColumnDefinitions>
+				
+				<!-- LINKS: Schreibtisch Stammdaten -->
+				<Border Grid.Column="0" Background="White" CornerRadius="8" BorderBrush="#E5E7EB" BorderThickness="1" Padding="20">
+					<StackPanel>
+						<TextBlock Text="Arbeitsplatz-Details" FontSize="15" FontWeight="Bold" Foreground="#374151" Margin="0,0,0,16"/>
+
+						<!-- Name des Schreibtischs -->
+						<TextBlock Text="Bezeichnung / Name" FontSize="12" FontWeight="Medium" Foreground="#4B5563" Margin="0,0,0,6"/>
+						<TextBox Text="{Binding DeskName, UpdateSourceTrigger=PropertyChanged}" 
+                             Height="36" Padding="8,4" VerticalContentAlignment="Center"
+                             BorderBrush="#D1D5DB" Margin="0,0,0,16">
+							<TextBox.Resources>
+								<Style TargetType="Border">
+									<Setter Property="CornerRadius" Value="4"/>
+								</Style>
+							</TextBox.Resources>
+						</TextBox>
+
+						<!-- Raum-Auswahl -->
+						<TextBlock Text="Zugeordneter Raum" FontSize="12" FontWeight="Medium" Foreground="#4B5563" Margin="0,0,0,6"/>
+						<ComboBox ItemsSource="{Binding AvailableRooms}" 
+                              SelectedItem="{Binding SelectedRoom}"
+                              DisplayMemberPath="Name"
+                              Height="36" Padding="8,4" VerticalContentAlignment="Center"
+                              BorderBrush="#D1D5DB" Margin="0,0,0,16">
+							<ComboBox.Resources>
+								<Style TargetType="Border">
+									<Setter Property="CornerRadius" Value="4"/>
+								</Style>
+							</ComboBox.Resources>
+						</ComboBox>
+
+						<!-- Status / Typ (Höhenverstellbar etc.) -->
+						<TextBlock Text="Ausstattungstyp" FontSize="12" FontWeight="Medium" Foreground="#4B5563" Margin="0,0,0,6"/>
+						<StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+							<RadioButton Content="Standard" IsChecked="{Binding IsStandardDesk}" Margin="0,0,16,0" VerticalAlignment="Center"/>
+							<RadioButton Content="Höhenverstellbar" IsChecked="{Binding IsHeightAdjustable}" VerticalAlignment="Center"/>
+						</StackPanel>
+
+						<!-- Bemerkungen -->
+						<TextBlock Text="Bemerkungen / Notizen" FontSize="12" FontWeight="Medium" Foreground="#4B5563" Margin="0,0,0,6"/>
+						<TextBox Text="{Binding Remarks}" AcceptsReturn="True" Height="100" TextWrapping="Wrap" 
+                             Padding="8" VerticalScrollBarVisibility="Auto" BorderBrush="#D1D5DB">
+							<TextBox.Resources>
+								<Style TargetType="Border">
+									<Setter Property="CornerRadius" Value="4"/>
+								</Style>
+							</TextBox.Resources>
+						</TextBox>
+					</StackPanel>
+				</Border>
+			</Grid>
+		</Grid>
+		</ScrollViewer>
+	</Grid>
+</UserControl>
