@@ -10,7 +10,7 @@ namespace DA.SharedDeskPlanner.Model
 	/// <Change Datum="26.06.2026" Entwickler="DA">Interface ISharedDeskPlanner added</Change>
 	/// <Change Datum="28.06.2026" Entwickler="DA">InventoryItem.Desk removed</Change>
 		/// </ChangeLog>
-	public class SharedDeskPlannerContext : DbContext, ISharedDeskPlannerContext
+	public class SharedDeskPlannerContext : DbContext, ISharedDeskPlannerContext, IDisposable
 	{
 		private string _connectionString = "";
 		private IConfiguration? _configuration;
@@ -20,14 +20,14 @@ namespace DA.SharedDeskPlanner.Model
 		public DbSet<User> Users { get; set; }
 		public DbSet<Booking> Bookings { get; set; }
 
-		public SharedDeskPlannerContext(IConfiguration? cfg = null) : base()
-		{
-			if (cfg != null)
-			{
-				_configuration = cfg;
-				_connectionString = _configuration["ConnectionStrings:da_sdp_db"]!;
-			}
-		}
+		//public SharedDeskPlannerContext(IConfiguration? cfg = null) : base()
+		//{
+		//	if (cfg != null)
+		//	{
+		//		_configuration = cfg;
+		//		_connectionString = _configuration["ConnectionStrings:da_sdp_db"]!;
+		//	}
+		//}
 
 		public SharedDeskPlannerContext(string connString) : base()
 		{

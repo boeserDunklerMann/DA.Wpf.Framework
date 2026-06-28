@@ -41,9 +41,10 @@ namespace DA.Wpf.Framework.Auth
 
 			// 1. User aus der DB fischen
 			var user = await ctx.Users
+				//	.FirstOrDefaultAsync(u => EF.Functions.Like(u.Name, Username) && !u.Deleted);
 				.FirstOrDefaultAsync(u => u.Name == Username && !u.Deleted);
 
-			if (user != null /* && PasswordHashValid(Password, user.PasswordHash) */)
+			if (user != null && user.Name.Equals(Username, StringComparison.Ordinal)) /* && PasswordHashValid(Password, user.PasswordHash) */
 			{
 				// 2. In den globalen Session-Service schreiben!
 				userService.SetCurrentUser(user);

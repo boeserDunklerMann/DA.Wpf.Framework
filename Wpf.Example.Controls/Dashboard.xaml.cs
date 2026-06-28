@@ -20,10 +20,11 @@ namespace Wpf.Example.Controls
 	public partial class Dashboard : UserControl, IRibbonTabControl
 	{
 		private readonly DashboardViewModel vm;
-		public Dashboard(ISharedDeskPlannerContext ctx, IDialogService dialogService, ICurrentUserService userService)
+		// Wir fordern den fertigen serviceProvider an
+		public Dashboard(IServiceProvider serviceProvider, IDialogService dialogService, ICurrentUserService userService)
 		{
 			InitializeComponent();
-			vm = new(ctx, dialogService, userService);
+			vm = new(serviceProvider, dialogService, userService);
 			DataContext = vm;
 
 		}

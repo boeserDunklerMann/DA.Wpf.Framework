@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="ContextFactory.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="MySql.EntityFrameworkCore" Version="10.0.1" />
   </ItemGroup>
 

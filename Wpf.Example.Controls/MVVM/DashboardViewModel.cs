@@ -5,13 +5,14 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
 using DA.Wpf.Framework.Auth;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Wpf.Example.Controls.MVVM
 {
 	/// <ChangeLog>
 	/// <Create Datum="28.06.2026" Entwickler="DA" />
 	/// </ChangeLog>
-	internal class DashboardViewModel(ISharedDeskPlannerContext ctx, IDialogService dialogService, ICurrentUserService userService) : BaseViewModel(ctx)
+	internal class DashboardViewModel(IServiceProvider serviceProvider, IDialogService dialogService, ICurrentUserService userService) : BaseViewModel(null!)
 	{
 		#region BaseViewModel implementations
 		public override async Task OnInitAsync()
@@ -21,7 +22,7 @@ namespace Wpf.Example.Controls.MVVM
 
 		public override void OnStart()
 		{
-			_selectedUser = userService.IsLoggedInUser;
+			SelectedUser = userService.IsLoggedInUser;
 		}
 
 		public override void OnStop()
@@ -81,30 +82,36 @@ namespace Wpf.Example.Controls.MVVM
 		}
 		private async Task LoadDashboardAsync()
 		{
-			if (dbcontext != null)
+			//if (dbcontext != null)
 			{
 				if (_selectedUser != null)
 				{
-					var usersBookingsFromToday = await dbcontext.Bookings
-						.Where(b => b.UserId == _selectedUser.ID && b.BookingStart >= DateTime.UtcNow.Date && !b.Deleted).OrderBy(b=>b.BookingStart)
-						.ToListAsync();
-					TotalBookingsCount = usersBookingsFromToday.Count;
-					RaisePropChanged(nameof(TotalBookingsCount));
-					if (usersBookingsFromToday.Count > 0)
+					using (var ctx =serviceProvider.GetRequiredService<ISharedDeskPlannerContext>())
 					{
-						NextBookingDateString = usersBookingsFromToday.First().BookingStart.ToString("D", System.Globalization.CultureInfo.CurrentCulture);
-						RaisePropChanged(nameof(NextBookingDateString));
-						_bookings.Clear();
-						usersBookingsFromToday.ForEach(_bookings.Add);
+						var usersBookingsFromToday = await ctx.Bookings
+							.Where(b => b.UserId == _selectedUser.ID && b.BookingStart >= DateTime.UtcNow.Date && !b.Deleted).OrderBy(b => b.BookingStart)
+							.ToListAsync();
+						TotalBookingsCount = usersBookingsFromToday.Count;
+						RaisePropChanged(nameof(TotalBookingsCount));
+						if (usersBookingsFromToday.Count > 0)
+						{
+							NextBookingDateString = usersBookingsFromToday.First().BookingStart.ToString("D", System.Globalization.CultureInfo.CurrentCulture);
+							RaisePropChanged(nameof(NextBookingDateString));
+							_bookings.Clear();
+							usersBookingsFromToday.ForEach(_bookings.Add);
+						}
 					}
 				}
-				var users = await dbcontext.Users
+				using (var ctx = serviceProvider.GetRequiredService<ISharedDeskPlannerContext>())
+				{
+					var users = await ctx.Users
 					.Where(u => !u.Deleted).ToListAsync();
-				_availableUsers.Clear();
-				users.ForEach(_availableUsers.Add);
+					_availableUsers.Clear();
+					users.ForEach(_availableUsers.Add);
+				}
 			}
-			else
-				dialogService.ShowError("keinen DB context gefunden.");
+			//else
+			//	dialogService.ShowError("keinen DB context gefunden.");
 		}
 
 		#endregion

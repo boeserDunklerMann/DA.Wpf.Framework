@@ -3,6 +3,7 @@ using DA.SharedDeskPlanner.Model.Contracts;
 using DA.Wpf.Framework;
 using DA.Wpf.Framework.Attributes;
 using DA.Wpf.Framework.Auth;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
@@ -25,7 +26,7 @@ namespace Wpf.Example
 		private readonly ObservableCollection<IRibbonTabControl> tabControls = [];
 		private IServiceProvider? serviceProvider;
 
-		private async Task LoadAndInitPluginsAsync(ServiceCollection services)
+		private async Task<IServiceProvider> LoadAndInitPluginsAsync(ServiceCollection services)
 		{
 			var cfg = GetConfiguration();
 			services.AddSingleton(cfg);
@@ -33,10 +34,14 @@ namespace Wpf.Example
 			if (connString == null)
 				throw new NullReferenceException(nameof(connString));
 
-			services.AddScoped<ISharedDeskPlannerContext>(provider =>
+			services.AddTransient<ISharedDeskPlannerContext>(provider =>
 			{
 				return new SharedDeskPlannerContext(connString);
 			});
+			//services.AddPooledDbContextFactory<SharedDeskPlannerContext>(options =>
+			//	options.UseMySQL(connString));
+			//services.AddTransient<ISharedDeskPlannerContext>(provider =>
+			//	provider.GetRequiredService<IDbContextFactory<SharedDeskPlannerContext>>().CreateDbContext());
 
 			services.AddSingleton<IDialogService, DialogService>();
 			services.AddSingleton<ICurrentUserService, CurrentUserService>();
@@ -95,7 +100,7 @@ namespace Wpf.Example
 				await ctrl.OnInitAsync(services);
 				tabControls.Add(ctrl);
 			}
-
+			return serviceProvider;
 		}
 
 		private IConfiguration GetConfiguration()
@@ -119,8 +124,9 @@ namespace Wpf.Example
 
 			var services = new ServiceCollection();
 			ConfigureServices(services);
-			await LoadAndInitPluginsAsync(services);
-			serviceProvider = services.BuildServiceProvider();
+			
+			serviceProvider = await LoadAndInitPluginsAsync(services);
+
 			if (serviceProvider != null)
 			{
 				Current.ShutdownMode = ShutdownMode.OnExplicitShutdown;

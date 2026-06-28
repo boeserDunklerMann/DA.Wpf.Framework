@@ -6,7 +6,7 @@ namespace DA.SharedDeskPlanner.Model.Contracts
 	/// <ChangeLog>
 	/// <Create Datum="26.06.2026" Entwickler="DA" />
 	/// </ChangeLog>
-	public interface ISharedDeskPlannerContext
+	public interface ISharedDeskPlannerContext:IDisposable
 	{
 		DbSet<Booking> Bookings { get; set; }
 		DbSet<Desk> Desks { get; set; }
