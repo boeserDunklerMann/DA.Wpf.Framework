@@ -1,20 +1,10 @@
-﻿using DA.SharedDeskPlanner.Model;
-using DA.SharedDeskPlanner.Model.Contracts;
-using DA.Wpf.Framework;
+﻿using DA.Wpf.Framework;
 using DA.Wpf.Framework.Attributes;
-using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Ribbon;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Wpf.Example
 {
@@ -44,7 +34,61 @@ namespace Wpf.Example
 			sortedTabs.ForEach(t =>
 			{
 				RibbonTabControlAttribute attr = t.GetAttribute();
-				RibbonTab tab = new() { Header = attr.Heading };
+				RibbonTab tab = new();
+
+				// --- HIER DIE GRAFIK UND DEN TEXT DYNAMISCH IM CODE ZUSAMMENBAUEN ---
+
+				// 1. StackPanel für die horizontale Anordnung (Icon links, Text rechts)
+				var headerStack = new StackPanel { Orientation = Orientation.Horizontal };
+
+				// 2. Wenn das Plugin eine Geometrie liefert, bauen wir das Icon
+				if (!string.IsNullOrEmpty(t.IconGeometry))
+				{
+					try
+					{
+						// Versucht den String (z.B. "M10,20 L30,40...") in ein WPF Geometry-Objekt zu parsen
+						var geometry = Geometry.Parse(t.IconGeometry);
+
+						// Path-Element erstellen und konfigurieren
+						var path = new System.Windows.Shapes.Path
+						{
+							Data = geometry,
+							Stroke = System.Windows.Media.Brushes.DimGray, // Deine Wunschfarbe für die Kontur
+							StrokeThickness = 1.5,
+							StrokeStartLineCap = PenLineCap.Round,
+							StrokeEndLineCap = PenLineCap.Round,
+							Stretch = Stretch.Uniform
+						};
+
+						// Viewbox verpackt den Pfad, damit er sauber skaliert (z.B. 16x16 Pixel)
+						var viewbox = new Viewbox
+						{
+							Width = 16,
+							Height = 16,
+							Margin = new Thickness(0, 0, 6, 0), // Kleiner Abstand nach rechts zum Text
+							Child = path
+						};
+
+						headerStack.Children.Add(viewbox);
+					}
+					catch (Exception)
+					{
+						// Falls ein Plugin-Entwickler mal einen fehlerhaften XAML-String liefert,
+						// fangen wir das ab, damit die App nicht abstürzt.
+					}
+				}
+
+				// 3. Den Textblock für die Beschriftung hinzufügen
+				var textBlock = new TextBlock
+				{
+					Text = attr.Heading,
+					VerticalAlignment = VerticalAlignment.Center
+				};
+				headerStack.Children.Add(textBlock);
+
+				// 4. Das gesamte StackPanel als Header setzen
+				tab.Header = headerStack;
+
 				rbnMain.Items.Add(tab);
 			});
 		}

@@ -4,6 +4,7 @@ namespace DA.Wpf.Framework
 {
 	/// <ChangeLog>
 	/// <Create Datum="08.05.2026" Entwickler="DA" />
+	/// <Change Datum="28.06.2026" Entwickler="DA">prop. IconGeometry added</Change>
 	/// </ChangeLog>
 	/// <summary>
 	/// Interface for controls that should be inserted into a RibbonTab
@@ -29,6 +30,9 @@ namespace DA.Wpf.Framework
 		/// </summary>
 		/// <returns></returns>
 		Attributes.RibbonTabControlAttribute GetAttribute();
-
+		/// <summary>
+		/// Liefert die XAML-Pfadgeometrie für das Icon (z.B. "M10,20 L30,40...")
+		/// </summary>
+		string IconGeometry { get; }
 	}
 }
