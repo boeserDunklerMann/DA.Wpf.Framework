@@ -3,6 +3,7 @@ using DA.SharedDeskPlanner.Model.Contracts;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace DA.Wpf.Framework.Auth
 {
@@ -12,7 +13,7 @@ namespace DA.Wpf.Framework.Auth
 	/// <summary>
 	/// ViewModel for Login-Window
 	/// </summary>
-	internal class LoginViewModel(ICurrentUserService userService, ISharedDeskPlannerContext ctx) : INotifyPropertyChanged
+	public class LoginViewModel(ICurrentUserService userService, ISharedDeskPlannerContext ctx) : INotifyPropertyChanged
 	{
 		public event PropertyChangedEventHandler? PropertyChanged;
 		protected void RaisePropChanged(string propertyName = "") =>
@@ -21,11 +22,23 @@ namespace DA.Wpf.Framework.Auth
 		public string? Username { get; set; }
 		public string? Password { get; set; }    // TODO DA: sicherheit beachten
 
-		// 1. Nur deklarieren, noch nicht initialisieren!
-		public IAsyncRelayCommand<object> LoginCommand { get; } = new AsyncRelayCommand<object>(p => ((LoginViewModel)null!).ExecuteLoginAsync(p));
+		// Ein einfaches Backing-Field für das Command
+		private IAsyncRelayCommand<object>? _loginCommand;
 
-		private async Task ExecuteLoginAsync(object? windowParameter)
+		// Die Eigenschaft initialisiert das Command erst beim ersten Zugriff (Lazy)
+		// Zu diesem Zeitpunkt ist 'this' garantiert vollständig und sicher verfügbar!
+		public IAsyncRelayCommand<object> LoginCommand =>
+			_loginCommand ??= new AsyncRelayCommand<object>(ExecuteLoginAsync);
+
+		private async Task ExecuteLoginAsync(object? parameter)
 		{
+			if (parameter is not PasswordBox passwordBox) return;
+			// Hol das Fenster, in dem die PasswordBox liegt, um es später zu schließen
+			var currentWindow = Window.GetWindow(passwordBox);
+
+			// Das Passwort sicher auslesen
+			string clearTextPassword = passwordBox.Password;
+
 			// 1. User aus der DB fischen
 			var user = await ctx.Users
 				.FirstOrDefaultAsync(u => u.Name == Username && !u.Deleted);
@@ -36,7 +49,12 @@ namespace DA.Wpf.Framework.Auth
 				userService.SetCurrentUser(user);
 
 				// 3. Dem Fenster signalisieren, dass es sich schließen kann
-				if (windowParameter is Window window)
+				if (currentWindow != null)
+				{
+					currentWindow.DialogResult = true;
+					currentWindow.Close();
+				}
+				if (parameter is Window window)
 				{
 					window.DialogResult = true;
 					window.Close();

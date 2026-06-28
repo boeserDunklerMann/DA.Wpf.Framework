@@ -21,6 +21,7 @@ namespace Wpf.Example.Controls.MVVM
 
 		public override void OnStart()
 		{
+			_selectedUser = userService.IsLoggedInUser;
 		}
 
 		public override void OnStop()
@@ -101,7 +102,6 @@ namespace Wpf.Example.Controls.MVVM
 					.Where(u => !u.Deleted).ToListAsync();
 				_availableUsers.Clear();
 				users.ForEach(_availableUsers.Add);
-				_selectedUser = userService.IsLoggedInUser;
 			}
 			else
 				dialogService.ShowError("keinen DB context gefunden.");

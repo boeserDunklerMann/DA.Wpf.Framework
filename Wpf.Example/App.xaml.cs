@@ -121,10 +121,47 @@ namespace Wpf.Example
 			ConfigureServices(services);
 			await LoadAndInitPluginsAsync(services);
 			serviceProvider = services.BuildServiceProvider();
+			if (serviceProvider != null)
+			{
+				Current.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+				var userService = serviceProvider.GetRequiredService<ICurrentUserService>();
+				var dbctx = serviceProvider.GetRequiredService<ISharedDeskPlannerContext>();
 
-			var mainWindow = serviceProvider.GetRequiredService<MainWindow>();
-			mainWindow.SetTabControls(tabControls);
-			mainWindow.Show();
+				var loginVM = new LoginViewModel(userService, dbctx);
+
+				// Window erstellen und das fertige ViewModel an den DataContext hängen
+				var loginWindow = new LoginWindow() { DataContext = loginVM };
+
+				//  Login-Fenster blockierend öffnen
+				bool? loginResult = loginWindow.ShowDialog();
+
+				if (loginResult == true)
+				{
+					// unser User befindet sich jetzt erst in ICurrentUserService
+					// nun OnStart für alle Plugins aufrufen, damit die wissen, dass sie nun angezeigt/gestartet werden und sich den aktuellen User holen
+					foreach (var tab in tabControls)
+						tab.OnStart();
+
+					// Zurückstellen auf den Standard, sobald das echte Hauptfenster da ist
+					Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
+
+					// Login erfolgreich -> Hauptfenster öffnen
+					var mainWindow = serviceProvider.GetRequiredService<MainWindow>();
+					// WICHTIG: WPF mitteilen, welches das echte Hauptfenster ist
+					Current.MainWindow = mainWindow;
+					mainWindow.SetTabControls(tabControls);
+					mainWindow.Show();
+				}
+				else
+				{
+					// Abgebrochen -> Tschüss!
+					Shutdown();
+				}
+			}
+			else
+			{
+				// TODO DA: Eskalation!
+			}
 		}
 	}
 }
