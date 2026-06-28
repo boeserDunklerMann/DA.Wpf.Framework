@@ -1,14 +1,27 @@
-﻿namespace DA.SharedDeskPlanner.Model
+﻿using System.Text.Json.Serialization;
+
+namespace DA.SharedDeskPlanner.Model
 {
 	/// <ChangeLog>
 	/// <Create Datum="18.02.2026" Entwickler="DA" />
+	/// <Change Datum="28.06.2026" Entwickler="DA">property Desk removed</Change>
+	/// <Change Datum="28.06.2026" Entwickler="DA">ICollection Desks added</Change>
+	/// <Change Datum="28.06.2026" Entwickler="DA">Prrop. InventoryNumber added</Change>
 	/// </ChangeLog>
 	/// <summary>
 	/// Items that belongs to a desk, like mouse, port-replicator, monitor, ...
 	/// </summary>
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable. AD: Darum kümmert sich EFCore
 	public class InventoryItem : BaseModel
 	{
+		/// <summary>
+		/// internal Inv-Nr.
+		/// </summary>
+		public string? InventoryNumber { get; set; }
+		/// <summary>
+		/// m:n-Beziehung zum Desk, damit ein Item mehrfach verwendet werden kann
+		/// </summary>
+		[JsonIgnore]
+		public virtual ICollection<Desk> Desks { get; set; } = [];
 		public override bool Equals(object? obj)
 		{
 			if (obj == null || !(obj is InventoryItem)) return false;
@@ -18,8 +31,5 @@
 		{
 			return ID.GetHashCode();
 		}
-
-		public virtual Desk? Desk { get; set; }
 	}
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable. AD: Darum kümmert sich EFCore
 }

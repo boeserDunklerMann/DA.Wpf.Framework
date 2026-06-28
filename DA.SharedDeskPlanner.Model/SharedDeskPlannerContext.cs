@@ -8,7 +8,8 @@ namespace DA.SharedDeskPlanner.Model
 	/// <Create Datum="18.02.2026" Entwickler="DA" />
 	/// <Change Datum="18.02.2026" Entwickler="DA">User and Booking added</Change>
 	/// <Change Datum="26.06.2026" Entwickler="DA">Interface ISharedDeskPlanner added</Change>
-	/// </ChangeLog>
+	/// <Change Datum="28.06.2026" Entwickler="DA">InventoryItem.Desk removed</Change>
+		/// </ChangeLog>
 	public class SharedDeskPlannerContext : DbContext, ISharedDeskPlannerContext
 	{
 		private string _connectionString = "";
@@ -86,7 +87,6 @@ namespace DA.SharedDeskPlanner.Model
 				entity.HasKey(d => d.ID);
 				entity.Property(d => d.Name).IsRequired();
 				entity.HasOne(d => d.Room).WithMany(r => r.Desks);
-				entity.HasMany(d => d.Inventory).WithOne(ii => ii.Desk);
 				entity.HasMany(d => d.Bookings).WithOne(b => b.Desk);
 			});
 			modelBuilder.Entity<InventoryItem>(entity =>

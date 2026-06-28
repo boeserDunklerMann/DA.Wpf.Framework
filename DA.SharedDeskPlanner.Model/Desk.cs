@@ -8,6 +8,7 @@ namespace DA.SharedDeskPlanner.Model
 	/// <ChangeLog>
 	/// <Create Datum="18.02.2026" Entwickler="DA" />
 	/// <Change Datum="18.02.2026" Entwickler="DA">Bookings added</Change>
+	/// <Change Datum="27.06.2026" Entwickler="DA">default initializer added to Inventory and Bookings</Change>
 	/// </ChangeLog>
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable. AD: Darum kümmert sich EFCore
 	public class Desk : BaseModel

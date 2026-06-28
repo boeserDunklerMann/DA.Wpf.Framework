@@ -134,6 +134,7 @@ namespace Wpf.Example.Controls.MVVM
 
 				var desks = await dbcontext.Desks
 					.Include(d => d.Room)
+					.Include(d => d.Inventory)
 					.Where(d => !d.Deleted).ToListAsync();
 				_desks.Clear();
 				desks.ForEach(_desks.Add);
