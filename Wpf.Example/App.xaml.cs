@@ -2,6 +2,7 @@
 using DA.SharedDeskPlanner.Model.Contracts;
 using DA.Wpf.Framework;
 using DA.Wpf.Framework.Attributes;
+using DA.Wpf.Framework.Auth;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
@@ -38,6 +39,7 @@ namespace Wpf.Example
 			});
 
 			services.AddSingleton<IDialogService, DialogService>();
+			services.AddSingleton<ICurrentUserService, CurrentUserService>();
 
 			List<IRibbonTabControl> ctrls = [];
 

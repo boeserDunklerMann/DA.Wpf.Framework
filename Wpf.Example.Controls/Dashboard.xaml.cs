@@ -1,6 +1,7 @@
 ﻿using DA.SharedDeskPlanner.Model.Contracts;
 using DA.Wpf.Framework;
 using DA.Wpf.Framework.Attributes;
+using DA.Wpf.Framework.Auth;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using System.Windows.Controls;
@@ -19,10 +20,10 @@ namespace Wpf.Example.Controls
 	public partial class Dashboard : UserControl, IRibbonTabControl
 	{
 		private readonly DashboardViewModel vm;
-		public Dashboard(ISharedDeskPlannerContext ctx, IDialogService dialogService)
+		public Dashboard(ISharedDeskPlannerContext ctx, IDialogService dialogService, ICurrentUserService userService)
 		{
 			InitializeComponent();
-			vm = new(ctx, dialogService);
+			vm = new(ctx, dialogService, userService);
 			DataContext = vm;
 
 		}

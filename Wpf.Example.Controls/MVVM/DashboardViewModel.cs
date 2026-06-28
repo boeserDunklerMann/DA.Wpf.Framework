@@ -4,13 +4,14 @@ using DA.Wpf.Framework;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
+using DA.Wpf.Framework.Auth;
 
 namespace Wpf.Example.Controls.MVVM
 {
 	/// <ChangeLog>
 	/// <Create Datum="28.06.2026" Entwickler="DA" />
 	/// </ChangeLog>
-	internal class DashboardViewModel(ISharedDeskPlannerContext ctx, IDialogService dialogService) : BaseViewModel(ctx)
+	internal class DashboardViewModel(ISharedDeskPlannerContext ctx, IDialogService dialogService, ICurrentUserService userService) : BaseViewModel(ctx)
 	{
 		#region BaseViewModel implementations
 		public override async Task OnInitAsync()
@@ -100,7 +101,7 @@ namespace Wpf.Example.Controls.MVVM
 					.Where(u => !u.Deleted).ToListAsync();
 				_availableUsers.Clear();
 				users.ForEach(_availableUsers.Add);
-				RaisePropChanged(nameof(AvailableUsers));
+				_selectedUser = userService.IsLoggedInUser;
 			}
 			else
 				dialogService.ShowError("keinen DB context gefunden.");
