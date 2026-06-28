@@ -16,10 +16,10 @@ namespace Wpf.Example.Controls
 	public partial class Desks : UserControl, IRibbonTabControl
 	{
 		private readonly DesksViewModel vm;
-		public Desks(ISharedDeskPlannerContext ctx, IDialogService dialogService)
+		public Desks(IServiceProvider serviceProvider, IDialogService dialogService)
 		{
 			InitializeComponent();
-			vm = new(ctx, dialogService);
+			vm = new(serviceProvider, dialogService);
 			DataContext = vm;
 		}
 

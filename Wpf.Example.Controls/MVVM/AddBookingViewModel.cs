@@ -2,6 +2,7 @@
 using DA.SharedDeskPlanner.Model.Contracts;
 using DA.Wpf.Framework;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -12,7 +13,7 @@ namespace Wpf.Example.Controls.MVVM
 	/// <ChangeLog>
 	/// <Create Datum="28.06.2026" Entwickler="DA" />
 	/// </ChangeLog>
-	internal class AddBookingViewModel(ISharedDeskPlannerContext ctx, IDialogService dialogService) : BaseViewModel(ctx)
+	internal class AddBookingViewModel(IServiceProvider serviceProvider, IDialogService dialogService) : BaseViewModel
 	{
 		private bool iamLoading = false;
 		#region BaseViewModel implementation
@@ -105,52 +106,55 @@ namespace Wpf.Example.Controls.MVVM
 		}
 		private async Task LoadDataAsync()
 		{
-			if (dbcontext != null)
+			try
 			{
-				try
-				{
-					iamLoading = true;
-					// Speicher den aktuell gewählten Raum zwischen, um ihn nach dem Clear wiederherzustellen
-					var previousSelectionId = _selectedRoom?.ID;
+				iamLoading = true;
+				// Speicher den aktuell gewählten Raum zwischen, um ihn nach dem Clear wiederherzustellen
+				var previousSelectionId = _selectedRoom?.ID;
 
-					// Räume laden
+				// Räume laden
+				using (var dbcontext = serviceProvider.GetRequiredService<ISharedDeskPlannerContext>())
+				{
 					var rooms = await dbcontext.Rooms.Where(r => !r.Deleted).ToListAsync();
 
 					_rooms.Clear();
 					rooms.ForEach(_rooms.Add);
+				}
 
-					// Versuche, die vorherige Auswahl wiederherzustellen, falls sie noch existiert
-					if (previousSelectionId != null)
-					{
-						SelectedRoom = _rooms.FirstOrDefault(r => r.ID == previousSelectionId);
-					}
-					var selectedUID = _selectedUser?.ID;
+				// Versuche, die vorherige Auswahl wiederherzustellen, falls sie noch existiert
+				if (previousSelectionId != null)
+				{
+					SelectedRoom = _rooms.FirstOrDefault(r => r.ID == previousSelectionId);
+				}
+				var selectedUID = _selectedUser?.ID;
+				using (var dbcontext = serviceProvider.GetRequiredService<ISharedDeskPlannerContext>())
+				{
 					var users = await dbcontext.Users.Where(u => !u.Deleted).ToListAsync();
 					_availableUsers.Clear();
 					users.ForEach(_availableUsers.Add);
-					//RaisePropChanged(nameof(AvailableUsers));
 					if (selectedUID != null)
 						SelectedUser = users.FirstOrDefault(u => u.ID == selectedUID);
-
-					if (_selectedRoom != null)
+				}
+				if (_selectedRoom != null)
+				{
+					_availableDesks.Clear();
+					using (var dbcontext = serviceProvider.GetRequiredService<ISharedDeskPlannerContext>())
 					{
-						_availableDesks.Clear();
 						var allDesks = await dbcontext.Desks.Where(d => !d.Deleted && d.RoomID == _selectedRoom.ID).ToListAsync();
 						allDesks.ForEach(_availableDesks.Add);
 					}
 				}
-				catch (Exception ex)
-				{
-					dialogService.ShowError(ex.Message);
-				}
-				finally
-				{
-					iamLoading = false;
-				}
 			}
-			else
-				dialogService.ShowError("keinen DB context gefunden.");
+			catch (Exception ex)
+			{
+				dialogService.ShowError(ex.Message);
+			}
+			finally
+			{
+				iamLoading = false;
+			}
 		}
+		
 		#endregion
 	}
 }

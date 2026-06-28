@@ -2,6 +2,7 @@
 using DA.SharedDeskPlanner.Model.Contracts;
 using DA.Wpf.Framework;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -12,7 +13,7 @@ namespace Wpf.Example.Controls.MVVM
 	/// <ChangeLog>
 	/// <Create Datum="26.06.2026" Entwickler="DA" />
 	/// </ChangeLog>
-	internal class InventoryViewModel(ISharedDeskPlannerContext ctx, IDialogService dialogService) : BaseViewModel(ctx)
+	internal class InventoryViewModel(IServiceProvider serviceProvider, IDialogService dialogService) : BaseViewModel
 	{
 		private InventoryItem? _selectedInventoryItem;
 		public InventoryItem? SelectedInventoryItem
@@ -54,7 +55,7 @@ namespace Wpf.Example.Controls.MVVM
 		{
 			try
 			{
-				if (dbcontext != null)
+				using (var dbcontext = serviceProvider.GetRequiredService<ISharedDeskPlannerContext>())
 				{
 					await dbcontext.InventoryItems.AddAsync(_newInventoryItem);
 					await dbcontext.SaveChangesAsync();
@@ -62,8 +63,6 @@ namespace Wpf.Example.Controls.MVVM
 					_newInventoryItem = BaseModel.Create<InventoryItem>();
 					RaisePropChanged(nameof(NewInventoryItem));
 				}
-				else
-					dialogService.ShowError("kein DB Context vorhanden");
 			}
 			catch (Exception e)
 			{
@@ -74,14 +73,18 @@ namespace Wpf.Example.Controls.MVVM
 		{
 			try
 			{
-				if (dbcontext != null && _selectedInventoryItem != null)
+				if (_selectedInventoryItem != null)
 				{
-					_selectedInventoryItem.Deleted = true;
-					await dbcontext.SaveChangesAsync();
-					await LoadInventoryAsync();
+					using (var dbcontext = serviceProvider.GetRequiredService<ISharedDeskPlannerContext>())
+					{
+						dbcontext.InventoryItems.Attach(_selectedInventoryItem);
+						_selectedInventoryItem.Deleted = true;
+						await dbcontext.SaveChangesAsync();
+						await LoadInventoryAsync();
+					}
 				}
 				else
-					dialogService.ShowError($"DB Context oder {nameof(_selectedInventoryItem)} nicht vorhanden");
+					dialogService.ShowError($"{nameof(_selectedInventoryItem)} nicht vorhanden");
 			}
 			catch (Exception e)
 			{
@@ -93,19 +96,16 @@ namespace Wpf.Example.Controls.MVVM
 		#region private methods
 		private async Task LoadInventoryAsync()
 		{
-			if (dbcontext != null)
+			using (var dbcontext = serviceProvider.GetRequiredService<ISharedDeskPlannerContext>())
 			{
 				var selectedID = SelectedInventoryItem?.ID;
 
 				var invitems = await dbcontext.InventoryItems.Where(ii => !ii.Deleted).ToListAsync();
 				_inventory.Clear();
 				invitems.ForEach(_inventory.Add);
-				RaisePropChanged(nameof(Inventory));
 				if (selectedID != null)
 					SelectedInventoryItem = _inventory.FirstOrDefault(i => i.ID == selectedID);
 			}
-			else
-				dialogService.ShowError("kein DB Context vorhanden");
 		}
 
 		#endregion

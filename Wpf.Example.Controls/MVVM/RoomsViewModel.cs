@@ -2,6 +2,7 @@
 using DA.SharedDeskPlanner.Model.Contracts;
 using DA.Wpf.Framework;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
 using Wpf.Example.Controls.Model;
 
@@ -10,14 +11,14 @@ namespace Wpf.Example.Controls.MVVM
 	/// <ChangeLog>
 	/// <Create Datum="27.06.2026" Entwickler="DA" />
 	/// </ChangeLog>
-	internal class RoomsViewModel(ISharedDeskPlannerContext ctx, IDialogService dialogService) : BaseViewModel(ctx)
+	internal class RoomsViewModel(IServiceProvider serviceProvider, IDialogService dialogService) : BaseViewModel
 	{
 		// Das DataGrid bindet an diese flache Liste
 		public ObservableCollection<TreeGridNode> FlatView { get; set; } = new ObservableCollection<TreeGridNode>();
 
 		private async Task LoadRoomsAsync()
 		{
-			if (dbcontext != null)
+			using (var dbcontext = serviceProvider.GetRequiredService<ISharedDeskPlannerContext>())
 			{
 				var raeume = await dbcontext.Rooms
 					.Include(r => r.Desks)
@@ -35,8 +36,6 @@ namespace Wpf.Example.Controls.MVVM
 					AddNodeToFlatView(topNode);
 				});
 			}
-			else
-				dialogService.ShowError("keinen DB context gefunden.");
 		}
 		
 

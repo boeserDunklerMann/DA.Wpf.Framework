@@ -2,7 +2,9 @@
 using DA.SharedDeskPlanner.Model.Contracts;
 using DA.Wpf.Framework;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing.Text;
@@ -14,7 +16,7 @@ namespace Wpf.Example.Controls.MVVM
 	/// <ChangeLog>
 	/// <Create Datum="27.06.2026" Entwickler="DA" />
 	/// </ChangeLog>
-	internal class DesksViewModel(ISharedDeskPlannerContext ctx, IDialogService dialogService) : BaseViewModel(ctx)
+	internal class DesksViewModel(IServiceProvider serviceProvider, IDialogService dialogService) : BaseViewModel
 	{
 		#region BaseViewModel implementation
 		public override async Task OnInitAsync()
@@ -75,29 +77,27 @@ namespace Wpf.Example.Controls.MVVM
 		{
 			try
 			{
-				if (dbcontext != null)
+				if (_selectedRoom != null)
 				{
-					if (_selectedRoom != null)
+					_newDesk.Room = _selectedRoom;
+					foreach (var item in _availableInventories)
 					{
-						_newDesk.Room = _selectedRoom;
-						foreach (var item in _availableInventories)
-						{
-							if (item.IsChecked && _newDesk.Inventory != null)
-								_newDesk.Inventory.Add(item.Item);
-						}
+						if (item.IsChecked && _newDesk.Inventory != null)
+							_newDesk.Inventory.Add(item.Item);
+					}
+					using (var dbcontext = serviceProvider.GetRequiredService<ISharedDeskPlannerContext>())
+					{
 						await dbcontext.Desks.AddAsync(_newDesk);
 						await dbcontext.SaveChangesAsync();
-						await LoadDesksAsync();
-						_newDesk = BaseModel.Create<Desk>();
-						RaisePropChanged(nameof(NewDesk));
 					}
-					else
-					{
-						dialogService.ShowError("Ein Raum muss angegeben werden.");
-					}
+					await LoadDesksAsync();
+					_newDesk = BaseModel.Create<Desk>();
+					RaisePropChanged(nameof(NewDesk));
 				}
 				else
-					dialogService.ShowError("kein DB Context vorhanden");
+				{
+					dialogService.ShowError("Ein Raum muss angegeben werden.");
+				}
 			}
 			catch (Exception ex)
 			{
@@ -109,14 +109,16 @@ namespace Wpf.Example.Controls.MVVM
 		{
 			try
 			{
-				if (dbcontext != null)
-				{
-					_selectedDesk!.Deleted = true;
-					await dbcontext.SaveChangesAsync();
-					await LoadDesksAsync();
-				}
+				if (_selectedDesk != null)
+					using (var dbcontext = serviceProvider.GetRequiredService<ISharedDeskPlannerContext>())
+					{
+						dbcontext.Desks.Attach(_selectedDesk);
+						_selectedDesk.Deleted = true;
+						await dbcontext.SaveChangesAsync();
+						await LoadDesksAsync();
+					}
 				else
-					dialogService.ShowError("kein DB context vorhanden.");
+					dialogService.ShowError($"{nameof(_selectedDesk)} nicht gesetzt.");
 			}
 			catch (Exception ex)
 			{
@@ -124,21 +126,20 @@ namespace Wpf.Example.Controls.MVVM
 			}
 		}
 		#endregion
-		
+
 		#region private methods
 		private async Task LoadDesksAsync()
 		{
-			if (dbcontext != null)
-			{
-				var selectedDeskID = _selectedDesk?.ID;
+			var selectedDeskID = _selectedDesk?.ID;
 
+			using (var dbcontext = serviceProvider.GetRequiredService<ISharedDeskPlannerContext>())
+			{
 				var desks = await dbcontext.Desks
-					.Include(d => d.Room)
-					.Include(d => d.Inventory)
-					.Where(d => !d.Deleted).ToListAsync();
+			.Include(d => d.Room)
+			.Include(d => d.Inventory)
+			.Where(d => !d.Deleted).ToListAsync();
 				_desks.Clear();
 				desks.ForEach(_desks.Add);
-				RaisePropChanged(nameof(Desktops));
 
 				if (selectedDeskID != null)
 					SelectedDesk = desks.FirstOrDefault(d => d.ID == selectedDeskID);
@@ -146,19 +147,17 @@ namespace Wpf.Example.Controls.MVVM
 				_availableRooms.Clear();
 				var rooms = await dbcontext.Rooms.Where(r => !r.Deleted).ToListAsync();
 				rooms.ForEach(_availableRooms.Add);
-				RaisePropChanged(nameof(AvailableRooms));
-
-				_availableInventories.Clear();
+			}
+			_availableInventories.Clear();
+			using (var dbcontext = serviceProvider.GetRequiredService<ISharedDeskPlannerContext>())
+			{
 				var inventory = await dbcontext.InventoryItems.Where(ii => !ii.Deleted).ToListAsync();
 				inventory.ForEach(i =>
 				{
 					InventoryItem4NewDesk item = new(i);
 					_availableInventories.Add(item);
 				});
-				RaisePropChanged(nameof(AvailableInventories));
 			}
-			else
-				dialogService.ShowError("kein DB context vorhanden.");
 		}
 		#endregion
 	}

@@ -2,6 +2,7 @@
 using DA.SharedDeskPlanner.Model.Contracts;
 using DA.Wpf.Framework;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -12,7 +13,7 @@ namespace Wpf.Example.Controls.MVVM
 	/// <ChangeLog>
 	/// <Create Datum="27.06.2026" Entwickler="DA" />
 	/// </ChangeLog>
-	internal class BookingsViewModel(ISharedDeskPlannerContext ctx, IDialogService dialogService) : BaseViewModel(ctx)
+	internal class BookingsViewModel(IServiceProvider serviceProvider, IDialogService dialogService) : BaseViewModel
 	{
 		#region BaseViewModel implementations
 		public override async Task OnInitAsync()
@@ -55,14 +56,12 @@ namespace Wpf.Example.Controls.MVVM
 		{
 			try
 			{
-				if (dbcontext != null)
+				using (var dbcontext = serviceProvider.GetRequiredService<ISharedDeskPlannerContext>())
 				{
 					_selectedBooking!.Deleted = true;
 					await dbcontext.SaveChangesAsync();
 					await LoadBookingsAsync();
 				}
-				else
-					dialogService.ShowError("kein DB Context vorhanden");
 			}
 			catch (Exception ex)
 			{
@@ -74,21 +73,17 @@ namespace Wpf.Example.Controls.MVVM
 		#region private methods
 		private async Task LoadBookingsAsync()
 		{
-			if (dbcontext != null)
+			using (var dbcontext = serviceProvider.GetRequiredService<ISharedDeskPlannerContext>())
 			{
 				var bookings = await dbcontext.Bookings
-					.Include(b => b.Desk)
-					.Include(b => b.User)
-					.Where(b => !b.Deleted).ToListAsync();
+				.Include(b => b.Desk)
+				.Include(b => b.User)
+				.Where(b => !b.Deleted).ToListAsync();
 				_bookings.Clear();
 				bookings.ForEach(_bookings.Add);
-				RaisePropChanged(nameof(Bookings));
-			}
-			else
-			{
-				dialogService.ShowError("keinen DB context gefunden.");
 			}
 		}
+		
 		#endregion
 	}
 }

@@ -2,6 +2,7 @@
 using DA.SharedDeskPlanner.Model.Contracts;
 using DA.Wpf.Framework;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using System.Collections.ObjectModel;
 
 namespace Wpf.Example.Controls.MVVM
@@ -9,7 +10,7 @@ namespace Wpf.Example.Controls.MVVM
 	/// <ChangeLog>
 	/// <Create Datum="08.05.2026" Entwickler="DA" />
 	/// </ChangeLog>
-	internal class UserListViewModel(ISharedDeskPlannerContext context, IDialogService dialogService) : BaseViewModel(context)
+	internal class UserListViewModel(IServiceProvider serviceProvider, IDialogService dialogService) : BaseViewModel
 	{
 		#region Bound lists & props
 		private User _newUser = BaseModel.Create<User>();
@@ -54,16 +55,18 @@ namespace Wpf.Example.Controls.MVVM
 		{
 			try
 			{
-				if (dbcontext != null)
-				{
-					_selectedUser!.Deleted = true;
+				if (_selectedUser != null)
+					using (var dbcontext = serviceProvider.GetRequiredService<ISharedDeskPlannerContext>())
+					{
+						dbcontext.Users.Attach(_selectedUser);
+						_selectedUser.Deleted = true;
 
-					await dbcontext.SaveChangesAsync();
-					await LoadUsersAsync();
-					dialogService.ShowInfo("Benutzer gelöscht.");
-				}
+						await dbcontext.SaveChangesAsync();
+						await LoadUsersAsync();
+						dialogService.ShowInfo("Benutzer gelöscht.");
+					}
 				else
-					dialogService.ShowError("kein DB Context vorhanden");
+					dialogService.ShowError($"{nameof(_selectedUser)} nicht vorhanden");
 			}
 			catch (Exception ex)
 			{
@@ -74,7 +77,7 @@ namespace Wpf.Example.Controls.MVVM
 		{
 			try
 			{
-				if (dbcontext != null)
+				using (var dbcontext = serviceProvider.GetRequiredService<ISharedDeskPlannerContext>())
 				{
 					await dbcontext.Users.AddAsync(_newUser);
 					await dbcontext.SaveChangesAsync();
@@ -82,9 +85,6 @@ namespace Wpf.Example.Controls.MVVM
 					_newUser = BaseModel.Create<User>();
 					RaisePropChanged(nameof(NewUser));
 				}
-				else
-					dialogService.ShowError("kein DB Context vorhanden");
-
 			}
 			catch (Exception ex)
 			{
@@ -96,20 +96,17 @@ namespace Wpf.Example.Controls.MVVM
 		#region private methods
 		private async Task LoadUsersAsync()
 		{
-			if (dbcontext != null)
+			using (var dbcontext = serviceProvider.GetRequiredService<ISharedDeskPlannerContext>())
 			{
 				// FIX: Auswahl erhalten (Selection Preservation)
 				var selectedId = SelectedUser?.ID;
 				var user = await dbcontext.Users.Include(nameof(User.Bookings)).Where(u => !u.Deleted).ToListAsync();
 				_users.Clear();
 				user.ForEach(_users.Add);
-				RaisePropChanged(nameof(Users));
 
 				if (selectedId != null)
 					SelectedUser = _users.FirstOrDefault(u => u.ID == selectedId);
 			}
-			else
-				dialogService.ShowError("kein DB Context vorhanden");
 		}
 
 		#endregion

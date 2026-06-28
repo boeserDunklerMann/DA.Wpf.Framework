@@ -12,7 +12,7 @@ namespace Wpf.Example.Controls.MVVM
 	/// <ChangeLog>
 	/// <Create Datum="28.06.2026" Entwickler="DA" />
 	/// </ChangeLog>
-	internal class DashboardViewModel(IServiceProvider serviceProvider, IDialogService dialogService, ICurrentUserService userService) : BaseViewModel(null!)
+	internal class DashboardViewModel(IServiceProvider serviceProvider, IDialogService dialogService, ICurrentUserService userService) : BaseViewModel
 	{
 		#region BaseViewModel implementations
 		public override async Task OnInitAsync()
@@ -60,15 +60,13 @@ namespace Wpf.Example.Controls.MVVM
 		private async Task CmdCancelBookingCommandAsync(Booking? sender)
 		{
 			if (sender == null) return;
-			if (dbcontext != null)
+			using (var dbcontext =serviceProvider.GetRequiredService<ISharedDeskPlannerContext>())
 			{
 				sender.Deleted = true;
 				dbcontext.Bookings.Update(sender);
 				await dbcontext.SaveChangesAsync();
 				_bookings.Remove(sender);
 			}
-			else
-				dialogService.ShowError("keinen DB context gefunden.");
 		}
 		#endregion
 

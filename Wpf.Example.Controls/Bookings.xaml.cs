@@ -1,5 +1,4 @@
-﻿using DA.SharedDeskPlanner.Model.Contracts;
-using DA.Wpf.Framework;
+﻿using DA.Wpf.Framework;
 using DA.Wpf.Framework.Attributes;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
@@ -19,10 +18,10 @@ namespace Wpf.Example.Controls
 	public partial class Bookings : UserControl, IRibbonTabControl
 	{
 		private readonly BookingsViewModel vm;
-		public Bookings(ISharedDeskPlannerContext ctx, IDialogService dlgService)
+		public Bookings(IServiceProvider serviceProvider, IDialogService dlgService)
 		{
 			InitializeComponent();
-			vm = new BookingsViewModel(ctx, dlgService);
+			vm = new BookingsViewModel(serviceProvider, dlgService);
 			DataContext = vm;
 		}
 

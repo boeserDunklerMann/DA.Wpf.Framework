@@ -19,10 +19,10 @@ namespace Wpf.Example.Controls
 	public partial class Rooms : UserControl, IRibbonTabControl
 	{
 		private readonly RoomsViewModel vm;
-		public Rooms(ISharedDeskPlannerContext ctx, IDialogService dlgService)
+		public Rooms(IServiceProvider serviceProvider, IDialogService dlgService)
 		{
 			InitializeComponent();
-			vm = new RoomsViewModel(ctx, dlgService);
+			vm = new RoomsViewModel(serviceProvider, dlgService);
 			DataContext = vm;
 		}
 

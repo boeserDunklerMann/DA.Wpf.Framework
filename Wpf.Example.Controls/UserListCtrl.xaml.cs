@@ -1,5 +1,4 @@
-﻿using DA.SharedDeskPlanner.Model.Contracts;
-using DA.Wpf.Framework;
+﻿using DA.Wpf.Framework;
 using DA.Wpf.Framework.Attributes;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
@@ -19,10 +18,10 @@ namespace Wpf.Example.Controls
 	public partial class UserListCtrl : UserControl, IRibbonTabControl
 	{
 		private UserListViewModel? vm;
-		public UserListCtrl(ISharedDeskPlannerContext ctx, IDialogService dialogService)
+		public UserListCtrl(IServiceProvider serviceProvider, IDialogService dialogService)
 		{
 			InitializeComponent();
-			vm = new UserListViewModel(ctx, dialogService);
+			vm = new UserListViewModel(serviceProvider, dialogService);
 			DataContext = vm;
 		}
 

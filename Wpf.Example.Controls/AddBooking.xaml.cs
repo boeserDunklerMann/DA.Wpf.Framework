@@ -29,10 +29,10 @@ namespace Wpf.Example.Controls
 	public partial class AddBooking : UserControl, IRibbonTabControl
 	{
 		private readonly AddBookingViewModel vm;
-		public AddBooking(ISharedDeskPlannerContext ctx, IDialogService dialogService)
+		public AddBooking(IServiceProvider serviceProvider, IDialogService dialogService)
 		{
 			InitializeComponent();
-			vm = new(ctx, dialogService);
+			vm = new(serviceProvider, dialogService);
 			DataContext = vm;
 		}
 
