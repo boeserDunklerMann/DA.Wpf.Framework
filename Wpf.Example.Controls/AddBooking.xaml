@@ -1,0 +1,170 @@
+﻿<UserControl x:Class="Wpf.Example.Controls.AddBooking"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Wpf.Example.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+	<Grid Margin="32">
+		<Grid.RowDefinitions>
+			<!-- Header (Titel & Zurück) -->
+			<RowDefinition Height="Auto"/>
+			<!-- Formular-Karten -->
+			<RowDefinition Height="*"/>
+			<!-- Aktions-Leiste unten -->
+			<RowDefinition Height="Auto"/>
+		</Grid.RowDefinitions>
+
+		<!-- ============================================================================== -->
+		<!-- HEADER -->
+		<!-- ============================================================================== -->
+		<StackPanel Grid.Row="0" Margin="0,0,0,24">
+			<TextBlock Text="Neuen Arbeitsplatz buchen" FontSize="24" FontWeight="Bold" Foreground="#111827"/>
+			<TextBlock Text="Wähle Raum, Datum und den gewünschten Schreibtisch aus." FontSize="13" Foreground="#6B7280" Margin="0,2,0,0"/>
+			<StackPanel Orientation="Horizontal">
+				<TextBlock Text="Wähle zunächst deinen User aus:" FontSize="13" Foreground="#6B7280"/>
+				<ComboBox ItemsSource="{Binding AvailableUsers}" SelectedItem="{Binding SelectedUser}"
+							  DisplayMemberPath="LastName"
+                              Height="36" Padding="8,4" VerticalContentAlignment="Center"
+                              BorderBrush="#D1D5DB" Margin="0,0,0,16">
+					<ComboBox.Resources>
+						<Style TargetType="Border">
+							<Setter Property="CornerRadius" Value="4"/>
+						</Style>
+					</ComboBox.Resources>
+				</ComboBox>
+
+			</StackPanel>
+		</StackPanel>
+
+		<!-- ============================================================================== -->
+		<!-- FORMULAR (Gebündelt in einer großen, sauberen Card) -->
+		<!-- ============================================================================== -->
+		<Border Grid.Row="1" Background="White" CornerRadius="12" BorderBrush="#E5E7EB" BorderThickness="1" Padding="24">
+			<ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+				<StackPanel>
+
+					<!-- SCHRITT 1: RAUM AUSWÄHLEN -->
+					<TextBlock Text="1. Raum auswählen" FontSize="14" FontWeight="SemiBold" Foreground="#4B5563" Margin="0,0,0,8"/>
+					<ComboBox ItemsSource="{Binding Rooms}"
+                              SelectedItem="{Binding SelectedRoom}"
+                              DisplayMemberPath="Name"
+                              Height="40" Padding="10,0" VerticalContentAlignment="Center"
+                              Margin="0,0,0,20">
+						<ComboBox.Resources>
+							<Style TargetType="Border">
+								<Setter Property="CornerRadius" Value="6"/>
+							</Style>
+						</ComboBox.Resources>
+					</ComboBox>
+
+					<!-- SCHRITT 2: DATUM WÄHLEN -->
+					<TextBlock Text="2. Datum auswählen" FontSize="14" FontWeight="SemiBold" Foreground="#4B5563" Margin="0,0,0,8"/>
+					<!-- Ein sauber eingebetteter Kalender -->
+					<Border BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="8" Padding="4" Margin="0,0,0,20" Background="#F9FAFB">
+						<Calendar SelectedDate="{Binding SelectedDate}" 
+                                  SelectionMode="SingleDate"
+                                  BorderThickness="0" 
+                                  HorizontalAlignment="Stretch"/>
+					</Border>
+
+					<!-- SCHRITT 3: SCHREIBTISCH WÄHLEN -->
+					<TextBlock Text="3. Freien Schreibtisch wählen" FontSize="14" FontWeight="SemiBold" Foreground="#4B5563" Margin="0,0,0,8"/>
+
+					<!-- ListBox zweckentfremdet als moderne "Karten-Auswahl" -->
+					<ListBox ItemsSource="{Binding AvailableDesks}"
+                             SelectedItem="{Binding SelectedDesk}"
+                             BorderThickness="0" Background="Transparent"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+						<ListBox.ItemContainerStyle>
+							<Style TargetType="ListBoxItem">
+								<Setter Property="Template">
+									<Setter.Value>
+										<ControlTemplate TargetType="ListBoxItem">
+											<!-- Die Schreibtisch-Karte -->
+											<Border x:Name="CardBorder" Background="#F9FAFB" CornerRadius="8" BorderBrush="#E5E7EB" BorderThickness="1" Margin="0,0,0,8" Padding="12">
+												<Grid>
+													<Grid.ColumnDefinitions>
+														<ColumnDefinition Width="*"/>
+														<ColumnDefinition Width="Auto"/>
+													</Grid.ColumnDefinitions>
+
+													<StackPanel Grid.Column="0">
+														<TextBlock Text="{Binding Name}" FontSize="14" FontWeight="Bold" Foreground="#111827"/>
+														<TextBlock Text="{Binding Remarks, FallbackValue='Keine Besonderheiten'}" FontSize="12" Foreground="#6B7280" FontStyle="Italic" Margin="0,2,0,0"/>
+													</StackPanel>
+
+													<!-- Visueller Haken, wenn ausgewählt -->
+													<TextBlock x:Name="CheckMark" Grid.Column="1" Text="✓" Foreground="#3B82F6" FontSize="16" FontWeight="Bold" Visibility="Collapsed" VerticalAlignment="Center" Margin="0,0,4,0"/>
+												</Grid>
+											</Border>
+
+											<ControlTemplate.Triggers>
+												<!-- Hover-Effekt -->
+												<Trigger Property="IsMouseOver" Value="True">
+													<Setter TargetName="CardBorder" Property="BorderBrush" Value="#9CA3AF"/>
+													<Setter TargetName="CardBorder" Property="Background" Value="#F3F4F6"/>
+												</Trigger>
+												<!-- Selektiert-Effekt (Wird blau) -->
+												<Trigger Property="IsSelected" Value="True">
+													<Setter TargetName="CardBorder" Property="BorderBrush" Value="#3B82F6"/>
+													<Setter TargetName="CardBorder" Property="Background" Value="#EFF6FF"/>
+													<Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+												</Trigger>
+											</ControlTemplate.Triggers>
+										</ControlTemplate>
+									</Setter.Value>
+								</Setter>
+							</Style>
+						</ListBox.ItemContainerStyle>
+					</ListBox>
+
+				</StackPanel>
+			</ScrollViewer>
+		</Border>
+
+		<!-- ============================================================================== -->
+		<!-- AKTIONS-LEISTE (UNTEN) -->
+		<!-- ============================================================================== -->
+		<Grid Grid.Row="2" Margin="0,20,0,0">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="*"/>
+				<ColumnDefinition Width="Auto"/>
+			</Grid.ColumnDefinitions>
+
+			<!-- Abbrechen links -->
+			<Button Grid.Column="0" 
+                    Command="{Binding CancelCommand}"
+                    Content="Abbrechen" 
+                    Background="Transparent" BorderThickness="0" Foreground="#4B5563" 
+                    HorizontalAlignment="Left" Padding="16,10" VerticalAlignment="Center"/>
+
+			<!-- Jetzt Buchen rechts (Modernes Tailwind-Blau) -->
+			<Button Grid.Column="1" 
+                    Command="{Binding SaveBookingCommand}"
+                    Content="Jetzt verbindlich buchen" 
+                    Background="#3B82F6" Foreground="White" FontWeight="SemiBold"
+                    Padding="24,10" BorderThickness="0">
+				<Button.Resources>
+					<Style TargetType="Border">
+						<Setter Property="CornerRadius" Value="6"/>
+					</Style>
+				</Button.Resources>
+				<Button.Style>
+					<Style TargetType="Button">
+						<Style.Triggers>
+							<Trigger Property="IsMouseOver" Value="True">
+								<Setter Property="Background" Value="#2563EB"/>
+							</Trigger>
+							<Trigger Property="IsEnabled" Value="False">
+								<Setter Property="Background" Value="#E5E7EB"/>
+								<Setter Property="Foreground" Value="#9CA3AF"/>
+							</Trigger>
+						</Style.Triggers>
+					</Style>
+				</Button.Style>
+			</Button>
+		</Grid>
+	</Grid>
+</UserControl>

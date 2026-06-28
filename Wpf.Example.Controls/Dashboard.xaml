@@ -30,7 +30,7 @@
 				<StackPanel Orientation="Horizontal">
 					<TextBlock Text="Wähle zunächst einen Benutzer:" FontSize="13" Margin="0,2,0,0" Foreground="#6b7280"/>
 					<ComboBox ItemsSource="{Binding AvailableUsers}" SelectedItem="{Binding SelectedUser}"
-							  DisplayMemberPath="Name"
+							  DisplayMemberPath="LastName"
                               Height="36" Padding="8,4" VerticalContentAlignment="Center"
                               BorderBrush="#D1D5DB" Margin="0,0,0,16">
 						<ComboBox.Resources>
@@ -92,7 +92,11 @@
 
 								<Grid>
 									<Grid.ColumnDefinitions>
-										<!-- Spalte 1: Datum & Wochentag -->
+										<!-- Spalte 1: Datum & Wochentag von -->
+										<ColumnDefinition Width="140"/>
+										<!-- Spalte 2: Vertikaler Trenner -->
+										<ColumnDefinition Width="Auto"/>
+										<!-- Spalte 1: Datum & Wochentag bis -->
 										<ColumnDefinition Width="140"/>
 										<!-- Spalte 2: Vertikaler Trenner -->
 										<ColumnDefinition Width="Auto"/>
@@ -114,9 +118,20 @@
 
 									<!-- DEZENTER TRENNER -->
 									<Rectangle Grid.Column="1" Width="1" Fill="#E5E7EB" Margin="16,4" Stretch="Fill"/>
+									
+									<!-- DATUM & WOCHENTAG -->
+									<StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="4,0,0,0">
+										<!-- z.B. "Mittwoch" -->
+										<TextBlock Text="{Binding BookingEnd, StringFormat=\{0:dddd\}}" FontSize="14" FontWeight="SemiBold" Foreground="#4B5563"/>
+										<!-- z.B. "01. Juli 2026" -->
+										<TextBlock Text="{Binding BookingEnd, StringFormat=\{0:dd. MMMM\}}" FontSize="16" FontWeight="Bold" Foreground="#111827" Margin="0,2,0,0"/>
+									</StackPanel>
+
+									<!-- DEZENTER TRENNER -->
+									<Rectangle Grid.Column="3" Width="1" Fill="#E5E7EB" Margin="16,4" Stretch="Fill"/>
 
 									<!-- TISCH & RAUM DETAILS -->
-									<StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="8,0,0,0">
+									<StackPanel Grid.Column="4" VerticalAlignment="Center" Margin="8,0,0,0">
 										<StackPanel Orientation="Horizontal">
 											<!-- Badge für den Raum -->
 											<Border Background="#F3F4F6" CornerRadius="4" Padding="6,2" Margin="0,0,8,0">
@@ -131,7 +146,7 @@
 									</StackPanel>
 
 									<!-- INVENTAR BADGES (Welche Hardware erwartet mich?) -->
-									<ItemsControl Grid.Column="3" ItemsSource="{Binding Desk.Inventory}" VerticalAlignment="Center" Margin="16,0">
+									<ItemsControl Grid.Column="5" ItemsSource="{Binding Desk.Inventory}" VerticalAlignment="Center" Margin="16,0">
 										<ItemsControl.ItemsPanel>
 											<ItemsPanelTemplate>
 												<StackPanel Orientation="Horizontal"/>
@@ -151,7 +166,7 @@
 									</ItemsControl>
 
 									<!-- AKTIONEN (Stornieren) -->
-									<Button Grid.Column="4" 
+									<Button Grid.Column="6" 
                                             Command="{Binding DataContext.CancelBookingCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                             CommandParameter="{Binding}"
                                             Content="Stornieren" 

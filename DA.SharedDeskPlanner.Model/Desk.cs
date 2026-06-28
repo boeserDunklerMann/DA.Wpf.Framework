@@ -31,6 +31,7 @@ namespace DA.SharedDeskPlanner.Model
 		public virtual ICollection<InventoryItem>? Inventory { get; set; } = [];
 		[JsonIgnore]
 		public virtual Room Room { get; set; }
+		public int RoomID { get; set; }
 		[JsonIgnore]
 		public virtual ICollection<Booking> Bookings { get; set; } = [];
 	}
